@@ -1,4 +1,4 @@
-package Network
+package PackManager
 
 import (
 	"bytes"
@@ -8,18 +8,18 @@ import (
 // Header 协议头
 type Header struct {
 	//包大小
-	packSize int
+	PackSize int
 	//指令
-	method int
+	Method int
 	//指令类别
-	methodType int
+	MethodType int
 }
 
 // Pack 协议体
 type Pack struct {
-	header Header
+	Header Header
 	//数据体
-	body []byte
+	Body []byte
 }
 
 // IntToBytes 整形转换成字节
@@ -52,14 +52,14 @@ func Decode(start int, b []byte) (proto *Pack) {
 	var pack Pack
 	size := b[start : start+4]
 	sizeInt := binary.BigEndian.Uint32(size)
-	pack.header.packSize = int(sizeInt)
+	pack.Header.PackSize = int(sizeInt)
 	cmd := b[start+4 : start+8]
 	cmdInt := binary.BigEndian.Uint32(cmd)
-	pack.header.method = int(cmdInt)
+	pack.Header.Method = int(cmdInt)
 	cmdType := b[start+8 : start+12]
 	cmdTypeInt := binary.BigEndian.Uint32(cmdType)
-	pack.header.methodType = int(cmdTypeInt)
-	pack.body = b[start+12 : start+int(sizeInt)]
+	pack.Header.MethodType = int(cmdTypeInt)
+	pack.Body = b[start+12 : start+int(sizeInt)]
 
 	proto = &pack
 	return proto

@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"testserver/PackManager"
 	"testserver/Utils"
 	"time"
 )
@@ -39,7 +40,8 @@ type ClientManager struct {
 
 	ClientMap map[string]TcpClient
 }
-var  ClientManagerHandle ClientManager
+
+var ClientManagerHandle ClientManager
 
 func NetworkInit() {
 	ClientManagerHandle.ClientMap = make(map[string]TcpClient)
@@ -137,13 +139,13 @@ func (client *TcpClient) StartRead(conn net.Conn) {
 		}
 
 		for decodeSize != n {
-			var decode *Pack
-			decode = Decode(decodeSize, buf)
+			var decode *PackManager.Pack
+			decode = PackManager.Decode(decodeSize, buf)
 			go MethodPerform(decode)
-			decodeSize = decodeSize + decode.header.packSize
+			decodeSize = decodeSize + decode.Header.PackSize
 			number = number + 1
 			fmt.Println("decodeSize = ", decodeSize, "n = ", n)
-			fmt.Println("服务器读到数据：", string(decode.body), "收到包个数：", number)
+			fmt.Println("服务器读到数据：", string(decode.Body), "收到包个数：", number)
 		}
 
 	}

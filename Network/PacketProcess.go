@@ -48,7 +48,7 @@ func (proto *Pack) CreateBuffer() (data []byte) {
 	return buf.Bytes()
 }
 
-func Decode(b []byte) (proto *Pack) {
+func Decode(start int, b []byte) (proto *Pack) {
 	var pack Pack
 	size := b[:4]
 	sizeInt := binary.BigEndian.Uint32(size)

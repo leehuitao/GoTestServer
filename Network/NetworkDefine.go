@@ -115,8 +115,8 @@ func (client *TcpClient) StartRead(conn net.Conn) {
 	// 循环读取客户端发送数据
 	number = 0
 	for {
-		buf := make([]byte, 4096)
-		var decodeSize int
+		buf := make([]byte, 4096*10)
+		decodeSize := 0
 		n, err := conn.Read(buf)
 		if n == 0 {
 			fmt.Println("客户端已关闭，断开连接")
@@ -128,11 +128,10 @@ func (client *TcpClient) StartRead(conn net.Conn) {
 			return
 		}
 
-		var decode *Pack
 		for decodeSize != n {
-			decode = Decode(buf[:n])
-			MethodPerform(decode)
-			buf = buf[decode.header.packSize:n]
+			var decode *Pack
+			decode = Decode(decodeSize, buf)
+			go MethodPerform(decode)
 			decodeSize = decodeSize + decode.header.packSize
 			number = number + 1
 			fmt.Println("decodeSize = ", decodeSize, "n = ", n)

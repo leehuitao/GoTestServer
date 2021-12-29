@@ -1,20 +1,25 @@
 package Network
 
-var MethodsMap map[int]func(pack *Pack)
+import "testserver/Methods"
+
+var MethodsMap map[int]func(pack *Pack)(request *Pack)
 
 func Init() {
-	MethodsMap = make(map[int]func(pack *Pack))
-	Registe()
+	MethodsMap = make(map[int]func(pack *Pack)(request *Pack))
+	Register()
 }
 
-func test(pack *Pack) {
+// Register 注册方法
+func Register() {
+	MethodsMap[Login] 				= Methods.SendLogin
+	MethodsMap[Logout] 				= Methods.SendLogout
+	MethodsMap[StartSendFile] 		= Methods.SendStartFile
+	MethodsMap[SendFileData] 		= Methods.SendFileData
+	MethodsMap[SendFileCancel] 		= Methods.SendFileCancel
+	MethodsMap[SendFileSuccess] 	= Methods.SendFileEnd
 
 }
 
-func Registe() {
-	MethodsMap[1] = test
-}
-
-func MethodPerform(pack *Pack) {
-
+func MethodPerform(pack *Pack) (request *Pack) {
+	return MethodsMap[pack.header.method](pack)
 }

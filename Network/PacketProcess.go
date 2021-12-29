@@ -22,7 +22,7 @@ type Pack struct {
 	body []byte
 }
 
-//整形转换成字节
+// IntToBytes 整形转换成字节
 func IntToBytes(n int) []byte {
 	x := int32(n)
 	bytesBuffer := bytes.NewBuffer([]byte{})
@@ -30,7 +30,7 @@ func IntToBytes(n int) []byte {
 	return bytesBuffer.Bytes()
 }
 
-//字节转换成整形
+// BytesToInt 字节转换成整形
 func BytesToInt(b []byte) int {
 	bytesBuffer := bytes.NewBuffer(b)
 

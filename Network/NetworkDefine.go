@@ -31,10 +31,18 @@ type TcpClient struct {
 	conn net.Conn
 }
 
-var ClientMap map[string]TcpClient
+type ClientManager struct {
+	//当前登录的个数
+	currentClientNumber int
+	//历史登录个数
+	historyClientNumber int
+
+	ClientMap map[string]TcpClient
+}
+var  ClientManagerHandle ClientManager
 
 func NetworkInit() {
-	ClientMap = make(map[string]TcpClient)
+	ClientManagerHandle.ClientMap = make(map[string]TcpClient)
 }
 
 // UpdateCurrentClientNumber 更新当前登录的个数
@@ -82,7 +90,7 @@ func (server *TcpServer) StartListen(address string) {
 		var client TcpClient
 		client.SetConn(conn)
 		// 存入缓存map key为ip:port
-		ClientMap[conn.RemoteAddr().String()] = client
+		ClientManagerHandle.ClientMap[conn.RemoteAddr().String()] = client
 		// 开始获取数据
 		go client.StartRead(client.conn)
 	}

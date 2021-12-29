@@ -2,11 +2,11 @@ package Network
 
 import (
 	"fmt"
-	"gotestserver/Utils"
 	"net"
 	"strconv"
 	"strings"
 	"sync"
+	"testserver/Utils"
 	"time"
 )
 
@@ -18,39 +18,40 @@ type TcpServer struct {
 	//历史登录个数
 	historyClientNumber int
 	//监听socket
-	server 				net.Listener
+	server net.Listener
 }
 type TcpClient struct {
 	//ip
-	ip 				string
+	ip string
 	//端口
-	port 			int
+	port int
 	//连接时间
-	loginTime		time.Time
+	loginTime time.Time
 	//客户端socket
-	conn 			net.Conn
+	conn net.Conn
 }
 
 var ClientMap map[string]TcpClient
 
-func init(){
+func NetworkInit() {
 	ClientMap = make(map[string]TcpClient)
 }
 
 // UpdateCurrentClientNumber 更新当前登录的个数
-func (server *TcpServer) UpdateCurrentClientNumber(updateNumber int) () {
+func (server *TcpServer) UpdateCurrentClientNumber(updateNumber int) {
 	numberMutex.Lock()
 	defer numberMutex.Unlock()
 	server.currentClientNumber = server.currentClientNumber + updateNumber
+
 }
 
 // GetCurrentClientNumber 获取当前登录的个数
-func (server *TcpServer) GetCurrentClientNumber( ) (currentClientNumber int) {
+func (server *TcpServer) GetCurrentClientNumber() (currentClientNumber int) {
 	return server.currentClientNumber
 }
 
 // AddHistoryClientNumber 新用户登录时增加一个
-func (server *TcpServer) AddHistoryClientNumber() () {
+func (server *TcpServer) AddHistoryClientNumber() {
 	server.historyClientNumber = server.historyClientNumber + 1
 }
 
@@ -60,12 +61,12 @@ func (server *TcpServer) GetHistoryClientNumber() (historyClientNumber int) {
 }
 
 // StartListen 服务开始监听 address (127.0.0.1:8000)
-func (server *TcpServer) StartListen(address string)  {
+func (server *TcpServer) StartListen(address string) {
 
 	listen, err := net.Listen("tcp", address)
 	server.server = listen
 	if err != nil {
-		fmt.Println("start listen error ",err.Error()," listen address ",address)
+		fmt.Println("start listen error ", err.Error(), " listen address ", address)
 		return
 	}
 	defer server.server.Close()
@@ -88,12 +89,12 @@ func (server *TcpServer) StartListen(address string)  {
 }
 
 // StopListen 服务停止监听
-func (server *TcpServer) StopListen() () {
+func (server *TcpServer) StopListen() {
 	server.server.Close()
 }
 
 // SetConn 设置客户端连接以及其他信息
-func (client *TcpClient) SetConn(conn net.Conn) () {
+func (client *TcpClient) SetConn(conn net.Conn) {
 
 	addr := conn.RemoteAddr().String()
 	split := strings.Split(addr, ":")
@@ -108,10 +109,13 @@ func (client *TcpClient) SetConn(conn net.Conn) () {
 	client.conn = conn
 }
 
-func (client *TcpClient) StartRead(conn net.Conn) () {
+var number int
+
+func (client *TcpClient) StartRead(conn net.Conn) {
 	// 循环读取客户端发送数据
-	buf := make([]byte, 4096*4)
+	number = 0
 	for {
+		buf := make([]byte, 4096)
 		var decodeSize int
 		n, err := conn.Read(buf)
 		if n == 0 {
@@ -123,16 +127,21 @@ func (client *TcpClient) StartRead(conn net.Conn) () {
 			fmt.Println("conn Read err", err)
 			return
 		}
+
+		var decode *Pack
 		for decodeSize != n {
-			decode := Decode(buf[:n])
+			decode = Decode(buf[:n])
 			MethodPerform(decode)
 			buf = buf[decode.header.packSize:n]
 			decodeSize = decodeSize + decode.header.packSize
+			number = number + 1
+			fmt.Println("decodeSize = ", decodeSize, "n = ", n)
+			fmt.Println("服务器读到数据：", string(decode.body), "收到包个数：", number)
 		}
-		fmt.Println("服务器读到数据：", string(buf[:n]))
+
 	}
 }
 
-func (client *TcpClient) SendData(data []byte) () {
+func (client *TcpClient) SendData(data []byte) {
 	client.conn.Write(data)
 }

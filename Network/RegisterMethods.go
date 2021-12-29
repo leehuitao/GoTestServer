@@ -2,18 +2,19 @@ package Network
 
 var MethodsMap map[int]func(pack *Pack)
 
-func init()  {
+func Init() {
 	MethodsMap = make(map[int]func(pack *Pack))
+	Registe()
 }
 
-func test(pack *Pack)  {
+func test(pack *Pack) {
 
 }
 
-func Registe()  {
+func Registe() {
 	MethodsMap[1] = test
 }
 
-func MethodPerform(pack *Pack)  {
-	
+func MethodPerform(pack *Pack) {
+
 }

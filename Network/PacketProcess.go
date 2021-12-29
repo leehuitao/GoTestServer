@@ -50,16 +50,16 @@ func (proto *Pack) CreateBuffer() (data []byte) {
 
 func Decode(start int, b []byte) (proto *Pack) {
 	var pack Pack
-	size := b[:4]
+	size := b[start : start+4]
 	sizeInt := binary.BigEndian.Uint32(size)
 	pack.header.packSize = int(sizeInt)
-	cmd := b[4:8]
+	cmd := b[start+4 : start+8]
 	cmdInt := binary.BigEndian.Uint32(cmd)
 	pack.header.method = int(cmdInt)
-	cmdType := b[8:12]
+	cmdType := b[start+8 : start+12]
 	cmdTypeInt := binary.BigEndian.Uint32(cmdType)
 	pack.header.methodType = int(cmdTypeInt)
-	pack.body = b[12:sizeInt]
+	pack.body = b[start+12 : start+int(sizeInt)]
 
 	proto = &pack
 	return proto

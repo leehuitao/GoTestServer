@@ -22,6 +22,13 @@ type Pack struct {
 	Body []byte
 }
 
+// Body 普通消息的json类型
+type Body struct {
+	dstUser string `json:"dstUser"`
+	msgType int    `json:"msgType"`
+	msg     string `json:"msg"`
+}
+
 // IntToBytes 整形转换成字节
 func IntToBytes(n int) []byte {
 	x := int32(n)

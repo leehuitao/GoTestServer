@@ -3,7 +3,10 @@ package Methods
 import (
 	"encoding/json"
 	"testserver/PackManager"
+	"testserver/Utils"
 )
+
+var newChannelCache = Utils.NewChannelCache()
 
 // SendLogin 登录
 func SendLogin(pack *PackManager.Pack) (requestPack *PackManager.Pack) {
@@ -38,6 +41,11 @@ func SendStartFile(pack *PackManager.Pack) (requestPack *PackManager.Pack) {
 	if err := json.Unmarshal(pack.Body, &fileBody); err != nil {
 		return nil
 	}
+	fileChannel := make(chan PackManager.FileBody, 5)
+	quitChannel := make(chan bool)
+	go Utils.AliveFileWrite(fileChannel, quitChannel, fileBody.FileName, fileBody.FileMD5)
+	newChannelCache.AddNewChannelCache(fileBody.FileMD5, fileChannel, quitChannel)
+
 	return pack
 }
 
@@ -47,6 +55,9 @@ func SendFileData(pack *PackManager.Pack) (requestPack *PackManager.Pack) {
 	if err := json.Unmarshal(pack.Body, &fileBody); err != nil {
 		return nil
 	}
+
+	newChannelCache.FileChanMap[fileBody.FileMD5] <- fileBody
+
 	return pack
 }
 
@@ -56,6 +67,10 @@ func SendFileCancel(pack *PackManager.Pack) (requestPack *PackManager.Pack) {
 	if err := json.Unmarshal(pack.Body, &fileBody); err != nil {
 		return nil
 	}
+
+	newChannelCache.FileStopChanMap[fileBody.FileMD5] <- true
+	newChannelCache.ClearChannelCache(fileBody.FileMD5)
+
 	return pack
 }
 
@@ -65,5 +80,9 @@ func SendFileEnd(pack *PackManager.Pack) (requestPack *PackManager.Pack) {
 	if err := json.Unmarshal(pack.Body, &fileBody); err != nil {
 		return nil
 	}
+	newChannelCache.FileChanMap[fileBody.FileMD5] <- fileBody
+	newChannelCache.FileStopChanMap[fileBody.FileMD5] <- true
+	newChannelCache.ClearChannelCache(fileBody.FileMD5)
+
 	return pack
 }

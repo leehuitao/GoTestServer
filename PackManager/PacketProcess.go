@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 )
 
+//-----------------一级协议包--------------------
 // Header 协议头
 type Header struct {
 	//包大小
@@ -22,11 +23,40 @@ type Pack struct {
 	Body []byte
 }
 
-// Body 普通消息的json类型
-type Body struct {
-	dstUser string `json:"dstUser"`
-	msgType int    `json:"msgType"`
-	msg     string `json:"msg"`
+//-----------------二级协议包--------------------
+// MsgBody 普通消息的json类型
+type MsgBody struct {
+	DstUser   string `json:"DstUser"`
+	DstUserID int    `json:"DstUserID"`
+	MsgType   int    `json:"MsgType"`
+	Msg       string `json:"Msg"`
+}
+type FileBody struct {
+	FileName    string `json:"FileName"`
+	TotalSize   int    `json:"TotalSize"`
+	CurrentSize int    `json:"CurrentSize"`
+	DstUserID   int    `json:"DstUserID"`
+	SendStatus  int    `json:"SendStatus"`
+	FileData    []byte `json:"FileData"`
+}
+
+// LoginBody  登录包json
+type LoginBody struct {
+	UserName string `json:"UserName"`
+	PassWord string `json:"PassWord"`
+	Notice   bool   `json:"Notice"`
+}
+
+// SystemBody  系统指令json
+type SystemBody struct {
+	SystemCMD string `json:"SystemCMD"`
+}
+
+// GroupBody  群组指令json
+type GroupBody struct {
+	DstGroupId string `json:"DstGroupId"`
+	Type       string `json:"Type"`
+	Msg        string `json:"Msg"`
 }
 
 // IntToBytes 整形转换成字节

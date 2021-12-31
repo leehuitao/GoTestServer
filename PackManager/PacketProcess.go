@@ -5,7 +5,7 @@ import (
 	"encoding/binary"
 )
 
-//-----------------一级协议包--------------------
+// Header -----------------一级协议包--------------------
 // Header 协议头
 type Header struct {
 	//包大小
@@ -23,7 +23,7 @@ type Pack struct {
 	Body []byte
 }
 
-//-----------------二级协议包--------------------
+// MsgBody -----------------二级协议包--------------------
 // MsgBody 普通消息的json类型
 type MsgBody struct {
 	DstUser   string `json:"DstUser"`

@@ -43,9 +43,11 @@ type FileBody struct {
 
 // LoginBody  登录包json
 type LoginBody struct {
-	UserName string `json:"UserName"`
-	PassWord string `json:"PassWord"`
-	Notice   bool   `json:"Notice"`
+	UserName   string `json:"UserName"`
+	PassWord   string `json:"PassWord"`
+	Notice     bool   `json:"Notice"`
+	MacAddress string `json:"MacAddress"`
+	LoginTime  string `json:"LoginTime"`
 }
 
 // SystemBody  系统指令json

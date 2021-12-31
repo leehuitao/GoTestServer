@@ -33,6 +33,7 @@ type MsgBody struct {
 }
 type FileBody struct {
 	FileName    string `json:"FileName"`
+	FileMD5     string `json:"FileMD5"`
 	TotalSize   int    `json:"TotalSize"`
 	CurrentSize int    `json:"CurrentSize"`
 	DstUserID   int    `json:"DstUserID"`

@@ -2,6 +2,7 @@ package MysqlManager
 
 import (
 	"database/sql"
+	_ "mysql"
 	"testserver/LogService"
 )
 
@@ -16,10 +17,11 @@ func StartMysqlService(ip string, port string, user string, password string, dat
 	connectStr := user + ":" + password + "@tcp(" + ip + ":" + port + ")/" + databaseName
 
 	pool, error := sql.Open("mysql", connectStr)
-	if error != nil {
+	if error != nil && pool != nil {
 		LogService.LogError("database init error = " + error.Error())
 		return
 	}
+	LogService.LogDebug("Mysql服务启动")
 	dbPool = pool
 	dbPool.SetMaxOpenConns(10)
 	dbPool.SetMaxIdleConns(10)

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"testserver/DBIO/MysqlManager"
 	"testserver/LogService"
 	"testserver/Network"
 )
@@ -10,8 +11,10 @@ func main() {
 	LogService.StartLogService("log")
 
 	LogService.LogDebug("日志服务启动")
+	//Mysql连接池启动
+	MysqlManager.StartMysqlService("", "", "", "", "")
 
-	//网络模块数据结构初始化
+	//网络模块启动
 	Network.NetworkInit()
 	var server Network.TcpServer
 	server.StartListen("127.0.0.1:12345")

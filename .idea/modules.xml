@@ -8,8 +8,11 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/GoTestServer.iml" filepath="$PROJECT_DIR$/.idea/GoTestServer.iml" />
       <module fileurl="file://$PROJECT_DIR$/LogService/LogService.iml" filepath="$PROJECT_DIR$/LogService/LogService.iml" />
       <module fileurl="file://$PROJECT_DIR$/Methods/Methods.iml" filepath="$PROJECT_DIR$/Methods/Methods.iml" />
+      <module fileurl="file://$PROJECT_DIR$/DBIO/MongoManager/MongoManager.iml" filepath="$PROJECT_DIR$/DBIO/MongoManager/MongoManager.iml" />
+      <module fileurl="file://$PROJECT_DIR$/DBIO/MysqlManager/MysqlManager.iml" filepath="$PROJECT_DIR$/DBIO/MysqlManager/MysqlManager.iml" />
       <module fileurl="file://$PROJECT_DIR$/Network/Network.iml" filepath="$PROJECT_DIR$/Network/Network.iml" />
       <module fileurl="file://$PROJECT_DIR$/PackManager/PackManager.iml" filepath="$PROJECT_DIR$/PackManager/PackManager.iml" />
+      <module fileurl="file://$PROJECT_DIR$/DBIO/RedisManager/RedisManager.iml" filepath="$PROJECT_DIR$/DBIO/RedisManager/RedisManager.iml" />
       <module fileurl="file://$PROJECT_DIR$/Task/Task.iml" filepath="$PROJECT_DIR$/Task/Task.iml" />
       <module fileurl="file://$PROJECT_DIR$/Utils/Utils.iml" filepath="$PROJECT_DIR$/Utils/Utils.iml" />
     </modules>

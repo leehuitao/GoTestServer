@@ -6,6 +6,7 @@
       <module fileurl="file://$PROJECT_DIR$/Cache/Cache.iml" filepath="$PROJECT_DIR$/Cache/Cache.iml" />
       <module fileurl="file://$PROJECT_DIR$/DBIO/DBIO.iml" filepath="$PROJECT_DIR$/DBIO/DBIO.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/GoTestServer.iml" filepath="$PROJECT_DIR$/.idea/GoTestServer.iml" />
+      <module fileurl="file://$PROJECT_DIR$/LogService/LogService.iml" filepath="$PROJECT_DIR$/LogService/LogService.iml" />
       <module fileurl="file://$PROJECT_DIR$/Methods/Methods.iml" filepath="$PROJECT_DIR$/Methods/Methods.iml" />
       <module fileurl="file://$PROJECT_DIR$/Network/Network.iml" filepath="$PROJECT_DIR$/Network/Network.iml" />
       <module fileurl="file://$PROJECT_DIR$/PackManager/PackManager.iml" filepath="$PROJECT_DIR$/PackManager/PackManager.iml" />

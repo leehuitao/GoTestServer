@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"testserver/LogService"
 	"testserver/PackManager"
 	"testserver/Utils"
 	"time"
@@ -82,7 +83,7 @@ func (server *TcpServer) StartListen(address string) {
 	defer server.server.Close()
 	for {
 		// 监听客户端连接请求
-		fmt.Println("服务器等待客户端连接")
+		LogService.LogDebug("网络服务启动 address = " + address)
 		conn, err := server.server.Accept()
 		if err != nil {
 			fmt.Println("listener.Accept err", err)

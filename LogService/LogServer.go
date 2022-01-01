@@ -1,6 +1,7 @@
 package LogService
 
 import (
+	"fmt"
 	"log"
 	"os"
 )
@@ -36,6 +37,7 @@ func goLogDebug(fileName string) {
 		select {
 		case data := <-debugChannel:
 			logger.Println(data)
+			fmt.Println(data)
 		}
 	}
 }
@@ -51,6 +53,7 @@ func goLogError(fileName string) {
 		select {
 		case data := <-errorChannel:
 			logger.Println(data)
+			fmt.Println(data)
 		}
 	}
 }

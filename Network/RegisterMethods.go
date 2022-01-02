@@ -16,6 +16,7 @@ func Init() {
 func Register() {
 	MethodsMap[Login] = Methods.SendLogin
 	MethodsMap[Logout] = Methods.SendLogout
+	MethodsMap[Msg] = Methods.SendMsg
 	MethodsMap[StartSendFile] = Methods.SendStartFile
 	MethodsMap[SendFileData] = Methods.SendFileData
 	MethodsMap[SendFileCancel] = Methods.SendFileCancel
@@ -24,6 +25,5 @@ func Register() {
 }
 
 func MethodPerform(pack *PackManager.Pack) (request *PackManager.Pack) {
-	pack.CreateBuffer()
 	return MethodsMap[pack.Header.Method](pack)
 }

@@ -1,4 +1,4 @@
-QT       += core gui
+QT       += core gui network concurrent
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -16,11 +16,20 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    File/file_thread.cpp \
+    Network/packet_process.cpp \
+    Network/tcp_client.cpp \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    tcp_client.cpp
 
 HEADERS += \
-    mainwindow.h
+    File/file_thread.h \
+    Network/packet_define.h \
+    Network/packet_process.h \
+    Network/tcp_client.h \
+    mainwindow.h \
+    tcp_client.h
 
 FORMS += \
     mainwindow.ui

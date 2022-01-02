@@ -17,8 +17,9 @@ golang测试并发服务器
 
 #### 使用说明
 
-需要安装模块
-go  get  -u github.com/go-sql-driver/mysql
+1.    需要安装模块
+    1.go  get  -u github.com/go-sql-driver/mysql，如果无法使用可以直接进入gopath 下的src目录  clone下来
+
 
 #### 参与贡献
 

@@ -5,6 +5,16 @@ import (
 	"encoding/binary"
 )
 
+const (
+	Login           = 100
+	Logout          = 101
+	Msg             = 102
+	StartSendFile   = 103
+	SendFileData    = 104
+	SendFileCancel  = 105
+	SendFileSuccess = 106
+)
+
 // Header -----------------一级协议包--------------------
 // Header 协议头
 type Header struct {
@@ -43,11 +53,12 @@ type FileBody struct {
 
 // LoginBody  登录包json
 type LoginBody struct {
-	UserName   string `json:"UserName"`
-	PassWord   string `json:"PassWord"`
-	Notice     bool   `json:"Notice"`
-	MacAddress string `json:"MacAddress"`
-	LoginTime  string `json:"LoginTime"`
+	UserName    string `json:"UserName"`
+	PassWord    string `json:"PassWord"`
+	Notice      bool   `json:"Notice"`
+	MacAddress  string `json:"MacAddress"`
+	LoginTime   string `json:"LoginTime"`
+	LoginStatus int    `json:"LoginStatus"`
 }
 
 // SystemBody  系统指令json

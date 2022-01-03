@@ -4,6 +4,12 @@
 #include <QDir>
 #include <QObject>
 #include <QCryptographicHash>
+#include <QJsonDocument>
+#include <QJsonParseError>
+#include <QJsonObject>
+#include <QJsonValue>
+#include <QJsonArray>
+#include <QDataStream>
 #define     Login 			 100
 #define     Logout 			 101
 #define     Msg				 102
@@ -11,6 +17,8 @@
 #define     SendFileData	 104
 #define     SendFileCancel	 105
 #define     SendFileSuccess	 106
+
+#define HeaderSize 12
 static QString createFileMd5(QString filePath){
     QString sMd5;
     QFile file(filePath);
@@ -51,7 +59,7 @@ struct LoginBody  {
     bool        Notice     ;
     QString     MacAddress ;
     QString     LoginTime  ;
-    int         LoginStatus;
+    int         LoginStatus = 0;
 };
 
 // Header 协议头
@@ -72,9 +80,30 @@ struct Pack  {
 
     Pack(MsgBody body, int method ,int methodType){}
     Pack(FileBody body, int method ,int methodType){}
-    Pack(LoginBody body, int method ,int methodType){}
+    Pack(LoginBody body, int method ,int methodType){
+        QJsonObject json;//构建json对象json
+        json.insert("UserName", body.UserName);
+        json.insert("PassWord", body.PassWord);
+        json.insert("Notice", body.Notice);
+        json.insert("MacAddress", body.MacAddress);
+        json.insert("LoginTime", body.LoginTime);
+        json.insert("LoginStatus", body.LoginStatus);
+        QJsonDocument document;
+        document.setObject(json);
+        QByteArray byte_array = document.toJson(QJsonDocument::Compact);
+        Body = byte_array;
+        Header.Method = method;
+        Header.MethodType = methodType;
+        Header.PackSize =HeaderSize +   Body.size();
+    }
 
-    QByteArray toByte(){}
+    QByteArray toByte(){
+        QByteArray m_buffer;
+        QDataStream packet(&m_buffer,QIODevice::WriteOnly);
+        packet<<Header.PackSize<<Header.Method<<Header.MethodType;
+        m_buffer += Body.data();
+        return m_buffer;
+    }
 };
 
 #endif // PACKET_DEFINE_H

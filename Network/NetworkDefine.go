@@ -142,7 +142,7 @@ func (client *TcpClient) StartRead(conn net.Conn) {
 		for decodeSize != n {
 			var decode *PackManager.Pack
 			decode = PackManager.Decode(decodeSize, buf)
-			go MethodPerform(decode)
+			go MethodPerform(decode, conn)
 			decodeSize = decodeSize + decode.Header.PackSize
 			number = number + 1
 			fmt.Println("decodeSize = ", decodeSize, "n = ", n)

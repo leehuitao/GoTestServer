@@ -8,7 +8,7 @@
 #include <QTcpServer>
 #include <QTcpSocket>
 #include "packet_process.h"
-#define HeaderSize 12
+
 
 class TcpClient: public QObject
 {
@@ -24,8 +24,12 @@ signals:
     void signRecvMsg(MsgBody);
     //发送到 文件线程
     void signRecvFile(FileBody);
+
+    void signRecvFileProgress(int totalsize,int currentsize,int sendstatus);
 public slots:
     void sendLogin(QString  ip,int port ,LoginBody body);
+
+    void sendLogout();
 
     void sendMsg(MsgBody body, int method ,int methodType);
 
@@ -33,15 +37,20 @@ public slots:
 private slots:
     void init();
 
+    void connected();
+
     void slotDisconnect(QAbstractSocket::SocketError socketError);
 
     void receiveData();
 
 private:
-    QTcpSocket *    m_socket;
+    QTcpSocket *    m_socket = nullptr;
     QList<MsgBody>  m_MsgCache;
     QByteArray      m_buffer;
     PacketProcess   m_packProcess;
+    QString         m_serverip;
+    int             m_serverport;
+    LoginBody       m_loginBody;
 };
 
 #endif // TCPCLIENT_H

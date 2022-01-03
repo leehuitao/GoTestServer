@@ -14,8 +14,10 @@ func main() {
 	//Mysql连接池启动
 	MysqlManager.StartMysqlService("", "", "", "", "")
 
+	Network.Init()
 	//网络模块启动
 	Network.NetworkInit()
+
 	var server Network.TcpServer
 	server.StartListen("127.0.0.1:12345")
 

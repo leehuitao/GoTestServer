@@ -7,7 +7,10 @@ class PacketProcess
 {
 public:
     PacketProcess();
-    void parsePack(QByteArray arr ,int packSize, int method,int methodType,void *,int packType);
+
+    LoginBody parseLoginPack(QByteArray arr);
+
+    MsgBody parseMsgPack(QByteArray arr);
 };
 
 #endif // PACKETPROCESS_H

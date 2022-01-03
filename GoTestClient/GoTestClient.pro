@@ -21,7 +21,6 @@ SOURCES += \
     Network/tcp_client.cpp \
     main.cpp \
     mainwindow.cpp \
-    tcp_client.cpp
 
 HEADERS += \
     File/file_thread.h \
@@ -29,7 +28,6 @@ HEADERS += \
     Network/packet_process.h \
     Network/tcp_client.h \
     mainwindow.h \
-    tcp_client.h
 
 FORMS += \
     mainwindow.ui

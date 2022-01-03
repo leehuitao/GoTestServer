@@ -1,29 +1,30 @@
 package Network
 
 import (
+	"net"
 	"testserver/Methods"
 	"testserver/PackManager"
 )
 
-var MethodsMap map[int]func(pack *PackManager.Pack) (request *PackManager.Pack)
+var MethodsMap map[int]func(pack *PackManager.Pack, conn net.Conn) (request *PackManager.Pack)
 
 func Init() {
-	MethodsMap = make(map[int]func(pack *PackManager.Pack) (request *PackManager.Pack))
+	MethodsMap = make(map[int]func(pack *PackManager.Pack, conn net.Conn) (request *PackManager.Pack))
 	Register()
 }
 
 // Register 注册方法
 func Register() {
-	MethodsMap[Login] = Methods.SendLogin
-	MethodsMap[Logout] = Methods.SendLogout
-	MethodsMap[Msg] = Methods.SendMsg
-	MethodsMap[StartSendFile] = Methods.SendStartFile
-	MethodsMap[SendFileData] = Methods.SendFileData
-	MethodsMap[SendFileCancel] = Methods.SendFileCancel
-	MethodsMap[SendFileSuccess] = Methods.SendFileEnd
+	MethodsMap[PackManager.Login] = Methods.SendLogin
+	MethodsMap[PackManager.Logout] = Methods.SendLogout
+	MethodsMap[PackManager.Msg] = Methods.SendMsg
+	MethodsMap[PackManager.StartSendFile] = Methods.SendStartFile
+	MethodsMap[PackManager.SendFileData] = Methods.SendFileData
+	MethodsMap[PackManager.SendFileCancel] = Methods.SendFileCancel
+	MethodsMap[PackManager.SendFileSuccess] = Methods.SendFileEnd
 
 }
 
-func MethodPerform(pack *PackManager.Pack) (request *PackManager.Pack) {
-	return MethodsMap[pack.Header.Method](pack)
+func MethodPerform(pack *PackManager.Pack, conn net.Conn) (request *PackManager.Pack) {
+	return MethodsMap[pack.Header.Method](pack, conn)
 }

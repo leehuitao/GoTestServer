@@ -7,13 +7,25 @@ TcpClient::TcpClient(QObject *parent)
 
 void TcpClient::sendLogin(QString ip, int port, LoginBody body)
 {
+    m_serverip = ip;
+    m_serverport = port;
+    m_loginBody = body;
+    if(m_socket != nullptr){
+        disconnect(m_socket,&QTcpSocket::connected,this,&TcpClient::connected);
+        disconnect(m_socket,&QTcpSocket::readyRead,this,&TcpClient::receiveData);
+        m_socket->close();
+        m_socket = nullptr;
+    }
+    m_socket = new QTcpSocket;
     m_socket->connectToHost(QHostAddress(ip),port);
-    connect(m_socket,&QTcpSocket::connected,[=](LoginBody body){//连接成功以后发送登录包
-        qDebug()<<"tcp connected";
-        Pack pack(body,Login,0);
-        auto data = pack.toByte();
-        m_socket->write(data);
-    });
+    connect(m_socket,&QTcpSocket::connected,this,&TcpClient::connected);
+    connect(m_socket,&QTcpSocket::readyRead,this,&TcpClient::receiveData);
+    connect(m_socket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &TcpClient::slotDisconnect);
+}
+
+void TcpClient::sendLogout()
+{
+
 }
 
 void TcpClient::sendMsg(MsgBody body, int method, int methodType)
@@ -30,12 +42,20 @@ void TcpClient::sendFile(FileBody body, int method, int methodType)
 
 void TcpClient::init()
 {
-    m_socket = new QTcpSocket;
+
+}
+
+void TcpClient::connected()
+{
+    qDebug()<<"tcp connected";
+    Pack pack(m_loginBody,Login,0);
+    auto data = pack.toByte();
+    m_socket->write(data);
 }
 
 void TcpClient::slotDisconnect(QAbstractSocket::SocketError socketError)
 {
-
+    signLoginStatus(0,"连接断开");
 }
 
 void TcpClient::receiveData()
@@ -72,15 +92,15 @@ void TcpClient::receiveData()
         memset(rbytes,0,size-HeaderSize);
         memcpy(rbytes,m_buffer.data()+HeaderSize,size-HeaderSize);
         QByteArray arr(rbytes);
+        arr.resize(size - HeaderSize);
         if(method == Login){
             LoginBody body;
-            m_packProcess.parsePack(arr,size,method,methodType,&body,method);
+            body = m_packProcess.parseLoginPack(arr);
             signLoginStatus(body.LoginStatus,body.LoginStatus ? "登录成功":"登录失败");
 
         }else if(method == Msg){
             MsgBody body;
-            m_packProcess.parsePack(arr,size,method,methodType,&body,method);
-
+            body = m_packProcess.parseMsgPack(arr);
             signRecvMsg(body);
         }else if(method == SendFileData){
             qDebug()<<"SendFileData";

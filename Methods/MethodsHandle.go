@@ -40,6 +40,7 @@ func SendLogin(pack *PackManager.Pack, conn net.Conn) (requestPack *PackManager.
 	}
 	if loginBody.PassWord == password {
 		loginBody.LoginStatus = 1
+		userCache.UpdateUserLoginStatus(loginBody.UserName, PackManager.LoginStatus)
 	} else {
 		loginBody.LoginStatus = 0
 	}
@@ -62,6 +63,11 @@ func SendLogout(pack *PackManager.Pack, conn net.Conn) (requestPack *PackManager
 	if err := json.Unmarshal(pack.Body, &loginBody); err != nil {
 		return nil
 	}
+	status := userCache.GetUserLoginStatus(loginBody.UserName)
+	if status != PackManager.LoginStatus {
+		return nil
+	}
+	userCache.UpdateUserLoginStatus(loginBody.UserName, PackManager.LogoffStatus)
 	return pack
 }
 
@@ -71,6 +77,10 @@ func SendMsg(pack *PackManager.Pack, conn net.Conn) (requestPack *PackManager.Pa
 	if err := json.Unmarshal(pack.Body, &msgBody); err != nil {
 		return nil
 	}
+	status := userCache.GetUserLoginStatus(msgBody.UserName)
+	if status != PackManager.LoginStatus {
+		return nil
+	}
 	return pack
 }
 
@@ -78,6 +88,10 @@ func SendMsg(pack *PackManager.Pack, conn net.Conn) (requestPack *PackManager.Pa
 func SendStartFile(pack *PackManager.Pack, conn net.Conn) (requestPack *PackManager.Pack) {
 	fileBody := PackManager.FileBody{}
 	if err := json.Unmarshal(pack.Body, &fileBody); err != nil {
+		return nil
+	}
+	status := userCache.GetUserLoginStatus(fileBody.UserName)
+	if status != PackManager.LoginStatus {
 		return nil
 	}
 	fileChannel := make(chan PackManager.FileBody, 5)
@@ -94,7 +108,10 @@ func SendFileData(pack *PackManager.Pack, conn net.Conn) (requestPack *PackManag
 	if err := json.Unmarshal(pack.Body, &fileBody); err != nil {
 		return nil
 	}
-
+	status := userCache.GetUserLoginStatus(fileBody.UserName)
+	if status != PackManager.LoginStatus {
+		return nil
+	}
 	newChannelCache.FileChanMap[fileBody.FileMD5] <- fileBody
 
 	return pack
@@ -106,7 +123,10 @@ func SendFileCancel(pack *PackManager.Pack, conn net.Conn) (requestPack *PackMan
 	if err := json.Unmarshal(pack.Body, &fileBody); err != nil {
 		return nil
 	}
-
+	status := userCache.GetUserLoginStatus(fileBody.UserName)
+	if status != PackManager.LoginStatus {
+		return nil
+	}
 	newChannelCache.FileStopChanMap[fileBody.FileMD5] <- true
 	newChannelCache.ClearChannelCache(fileBody.FileMD5)
 
@@ -117,6 +137,10 @@ func SendFileCancel(pack *PackManager.Pack, conn net.Conn) (requestPack *PackMan
 func SendFileEnd(pack *PackManager.Pack, conn net.Conn) (requestPack *PackManager.Pack) {
 	fileBody := PackManager.FileBody{}
 	if err := json.Unmarshal(pack.Body, &fileBody); err != nil {
+		return nil
+	}
+	status := userCache.GetUserLoginStatus(fileBody.UserName)
+	if status != PackManager.LoginStatus {
 		return nil
 	}
 	newChannelCache.FileChanMap[fileBody.FileMD5] <- fileBody

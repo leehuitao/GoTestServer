@@ -36,12 +36,14 @@ type Pack struct {
 // MsgBody -----------------二级协议包--------------------
 // MsgBody 普通消息的json类型
 type MsgBody struct {
+	UserName  string `json:"UserName"`
 	DstUser   string `json:"DstUser"`
 	DstUserID int    `json:"DstUserID"`
 	MsgType   int    `json:"MsgType"`
 	Msg       string `json:"Msg"`
 }
 type FileBody struct {
+	UserName    string `json:"UserName"`
 	FileName    string `json:"FileName"`
 	FileMD5     string `json:"FileMD5"`
 	TotalSize   int    `json:"TotalSize"`
@@ -63,11 +65,13 @@ type LoginBody struct {
 
 // SystemBody  系统指令json
 type SystemBody struct {
+	UserName  string `json:"UserName"`
 	SystemCMD string `json:"SystemCMD"`
 }
 
 // GroupBody  群组指令json
 type GroupBody struct {
+	UserName   string `json:"UserName"`
 	DstGroupId string `json:"DstGroupId"`
 	Type       string `json:"Type"`
 	Msg        string `json:"Msg"`

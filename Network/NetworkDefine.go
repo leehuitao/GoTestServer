@@ -80,10 +80,11 @@ func (server *TcpServer) StartListen(address string) {
 		fmt.Println("start listen error ", err.Error(), " listen address ", address)
 		return
 	}
+	LogService.LogDebug("网络服务启动 address = " + address)
 	defer server.server.Close()
 	for {
 		// 监听客户端连接请求
-		LogService.LogDebug("网络服务启动 address = " + address)
+
 		conn, err := server.server.Accept()
 		if err != nil {
 			fmt.Println("listener.Accept err", err)

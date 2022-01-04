@@ -16,6 +16,8 @@ const (
 )
 
 // Header -----------------一级协议包--------------------
+const HeaderSize = 12
+
 // Header 协议头
 type Header struct {
 	//包大小

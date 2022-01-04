@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/binary"
 	"encoding/json"
-	"fmt"
 	"net"
 	"testserver/PackManager"
 	"testserver/Utils"
@@ -13,11 +12,20 @@ import (
 var newChannelCache = Utils.NewChannelCache()
 var userCache = PackManager.NewUserCache()
 
-func IntToBytes(n int) []byte {
+func intToBytes(n int) []byte {
 	x := int32(n)
 	bytesBuffer := bytes.NewBuffer([]byte{})
 	binary.Write(bytesBuffer, binary.BigEndian, x)
 	return bytesBuffer.Bytes()
+}
+
+func createSendBuffer(pack PackManager.Pack) []byte {
+	var buffer bytes.Buffer //Buffer是一个实现了读写方法的可变大小的字节缓冲
+	buffer.Write(intToBytes(PackManager.HeaderSize + len(pack.Body)))
+	buffer.Write(intToBytes(pack.Header.Method))
+	buffer.Write(intToBytes(pack.Header.MethodType))
+	buffer.Write(pack.Body)
+	return buffer.Bytes()
 }
 
 // SendLogin 登录
@@ -26,17 +34,12 @@ func SendLogin(pack *PackManager.Pack, conn net.Conn) (requestPack *PackManager.
 	if err := json.Unmarshal(pack.Body, &loginBody); err != nil {
 		return nil
 	}
-	fmt.Println(loginBody)
-
 	password, err := userCache.GetUserPassword(loginBody.UserName)
-
 	resPack := PackManager.Pack{}
-	resPack.Header.PackSize = 12
-	resPack.Header.Method = PackManager.Login
+	resPack.Header.Method = pack.Header.Method
 	resPack.Header.MethodType = 0
-
 	if err != nil {
-		loginBody.LoginStatus = 0
+		loginBody.LoginStatus = -1
 	}
 	if loginBody.PassWord == password {
 		loginBody.LoginStatus = 1
@@ -45,14 +48,8 @@ func SendLogin(pack *PackManager.Pack, conn net.Conn) (requestPack *PackManager.
 	}
 	b, _ := json.Marshal(loginBody)
 	resPack.Body = b
-	var buffer bytes.Buffer //Buffer是一个实现了读写方法的可变大小的字节缓冲
-	buffer.Write(IntToBytes(12 + len(b)))
-	buffer.Write(IntToBytes(PackManager.Login))
-	buffer.Write(IntToBytes(0))
-	buffer.Write(b)
-
-	println(buffer.Bytes())
-	conn.Write(buffer.Bytes())
+	data := createSendBuffer(resPack)
+	conn.Write(data)
 	return pack
 }
 
@@ -62,6 +59,14 @@ func SendLogout(pack *PackManager.Pack, conn net.Conn) (requestPack *PackManager
 	if err := json.Unmarshal(pack.Body, &loginBody); err != nil {
 		return nil
 	}
+	resPack := PackManager.Pack{}
+	resPack.Header.Method = pack.Header.Method
+	resPack.Header.MethodType = 0
+	loginBody.LoginStatus = 1
+	b, _ := json.Marshal(loginBody)
+	resPack.Body = b
+	data := createSendBuffer(resPack)
+	conn.Write(data)
 	return pack
 }
 

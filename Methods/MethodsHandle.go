@@ -52,9 +52,25 @@ func SendLogin(pack *PackManager.Pack, conn net.Conn) (requestPack *PackManager.
 	buffer.Write(IntToBytes(0))
 	buffer.Write(b)
 
-	println(buffer.Bytes())
 	conn.Write(buffer.Bytes())
+	SendOnlineUserList(loginBody.UserName, conn)
 	return pack
+}
+
+func SendOnlineUserList(UserName string, conn net.Conn) (requestPack *PackManager.Pack) {
+	status := userCache.GetUserLoginStatus(UserName)
+	if status != PackManager.LoginStatus {
+		return nil
+	}
+	onlineList := userCache.GetOnlineUsers()
+	b := []byte(onlineList)
+	var buffer bytes.Buffer
+	buffer.Write(IntToBytes(12 + len(b)))
+	buffer.Write(IntToBytes(PackManager.OnlineUserList))
+	buffer.Write(IntToBytes(0))
+	buffer.Write(b)
+	conn.Write(buffer.Bytes())
+	return nil
 }
 
 // SendLogout 登出

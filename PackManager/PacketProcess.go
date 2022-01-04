@@ -13,6 +13,8 @@ const (
 	SendFileData    = 104
 	SendFileCancel  = 105
 	SendFileSuccess = 106
+
+	OnlineUserList = 200
 )
 
 // Header -----------------一级协议包--------------------

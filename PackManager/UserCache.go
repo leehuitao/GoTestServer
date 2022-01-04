@@ -26,6 +26,15 @@ func NewUserCache() (cache *UserCache) {
 	return cache
 
 }
+func (userCache *UserCache) GetOnlineUsers() string {
+	keys := ""
+	for k, v := range userCache.userLoginStatus {
+		if v == LoginStatus {
+			keys = keys + "," + k
+		}
+	}
+	return keys
+}
 
 func (userCache *UserCache) GetUserPassword(userName string) (string, error) {
 	body, exist := userCache.userCacheMap[userName]

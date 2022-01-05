@@ -3,14 +3,21 @@ package PackManager
 import "errors"
 
 type UserCache struct {
-	userCacheMap map[string]LoginBody
-	loginNumber  int
+	userCacheMap    map[string]LoginBody
+	loginNumber     int
+	userLoginStatus map[string]int
 }
+
+const (
+	LogoffStatus = 0
+	LoginStatus  = 1
+)
 
 func NewUserCache() (cache *UserCache) {
 	cache = &UserCache{
 		make(map[string]LoginBody),
 		0,
+		make(map[string]int),
 	}
 	body := LoginBody{}
 	body.UserName = "test"
@@ -18,6 +25,15 @@ func NewUserCache() (cache *UserCache) {
 	cache.userCacheMap["test"] = body
 	return cache
 
+}
+func (userCache *UserCache) GetOnlineUsers() string {
+	keys := ""
+	for k, v := range userCache.userLoginStatus {
+		if v == LoginStatus {
+			keys = keys + "," + k
+		}
+	}
+	return keys
 }
 
 func (userCache *UserCache) GetUserPassword(userName string) (string, error) {
@@ -36,4 +52,18 @@ func (userCache *UserCache) AddUserCache(userId string, LoginCache LoginBody) {
 
 func (userCache *UserCache) DelUserCache(userId string) {
 	delete(userCache.userCacheMap, userId)
+}
+
+func (userCache *UserCache) UpdateUserLoginStatus(userName string, status int) {
+	userCache.userLoginStatus[userName] = status
+}
+
+func (userCache *UserCache) GetUserLoginStatus(userName string) int {
+	status, exist := userCache.userLoginStatus[userName]
+
+	if exist {
+		return status
+	}
+
+	return LogoffStatus
 }

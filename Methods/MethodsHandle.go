@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"encoding/json"
+	"fmt"
 	"net"
 	"testserver/PackManager"
 	"testserver/Utils"
@@ -12,7 +13,7 @@ import (
 var newChannelCache = Utils.NewChannelCache()
 var userCache = PackManager.NewUserCache()
 
-func intToBytes(n int) []byte {
+func IntToBytes(n int) []byte {
 	x := int32(n)
 	bytesBuffer := bytes.NewBuffer([]byte{})
 	binary.Write(bytesBuffer, binary.BigEndian, x)
@@ -34,15 +35,20 @@ func SendLogin(pack *PackManager.Pack, conn net.Conn) (requestPack *PackManager.
 	if err := json.Unmarshal(pack.Body, &loginBody); err != nil {
 		return nil
 	}
+	fmt.Println(loginBody)
+
 	password, err := userCache.GetUserPassword(loginBody.UserName)
+
 	resPack := PackManager.Pack{}
 	resPack.Header.Method = pack.Header.Method
 	resPack.Header.MethodType = 0
+
 	if err != nil {
 		loginBody.LoginStatus = -1
 	}
 	if loginBody.PassWord == password {
 		loginBody.LoginStatus = 1
+		userCache.UpdateUserLoginStatus(loginBody.UserName, PackManager.LoginStatus)
 	} else {
 		loginBody.LoginStatus = 0
 	}
@@ -50,7 +56,24 @@ func SendLogin(pack *PackManager.Pack, conn net.Conn) (requestPack *PackManager.
 	resPack.Body = b
 	data := createSendBuffer(resPack)
 	conn.Write(data)
+	SendOnlineUserList(loginBody.UserName, conn)
 	return pack
+}
+
+func SendOnlineUserList(UserName string, conn net.Conn) (requestPack *PackManager.Pack) {
+	status := userCache.GetUserLoginStatus(UserName)
+	if status != PackManager.LoginStatus {
+		return nil
+	}
+	onlineList := userCache.GetOnlineUsers()
+	b := []byte(onlineList)
+	var buffer bytes.Buffer
+	buffer.Write(IntToBytes(12 + len(b)))
+	buffer.Write(IntToBytes(PackManager.OnlineUserList))
+	buffer.Write(IntToBytes(0))
+	buffer.Write(b)
+	conn.Write(buffer.Bytes())
+	return nil
 }
 
 // SendLogout 登出
@@ -59,14 +82,11 @@ func SendLogout(pack *PackManager.Pack, conn net.Conn) (requestPack *PackManager
 	if err := json.Unmarshal(pack.Body, &loginBody); err != nil {
 		return nil
 	}
-	resPack := PackManager.Pack{}
-	resPack.Header.Method = pack.Header.Method
-	resPack.Header.MethodType = 0
-	loginBody.LoginStatus = 1
-	b, _ := json.Marshal(loginBody)
-	resPack.Body = b
-	data := createSendBuffer(resPack)
-	conn.Write(data)
+	status := userCache.GetUserLoginStatus(loginBody.UserName)
+	if status != PackManager.LoginStatus {
+		return nil
+	}
+	userCache.UpdateUserLoginStatus(loginBody.UserName, PackManager.LogoffStatus)
 	return pack
 }
 
@@ -76,6 +96,10 @@ func SendMsg(pack *PackManager.Pack, conn net.Conn) (requestPack *PackManager.Pa
 	if err := json.Unmarshal(pack.Body, &msgBody); err != nil {
 		return nil
 	}
+	status := userCache.GetUserLoginStatus(msgBody.UserName)
+	if status != PackManager.LoginStatus {
+		return nil
+	}
 	return pack
 }
 
@@ -83,6 +107,10 @@ func SendMsg(pack *PackManager.Pack, conn net.Conn) (requestPack *PackManager.Pa
 func SendStartFile(pack *PackManager.Pack, conn net.Conn) (requestPack *PackManager.Pack) {
 	fileBody := PackManager.FileBody{}
 	if err := json.Unmarshal(pack.Body, &fileBody); err != nil {
+		return nil
+	}
+	status := userCache.GetUserLoginStatus(fileBody.UserName)
+	if status != PackManager.LoginStatus {
 		return nil
 	}
 	fileChannel := make(chan PackManager.FileBody, 5)
@@ -99,7 +127,10 @@ func SendFileData(pack *PackManager.Pack, conn net.Conn) (requestPack *PackManag
 	if err := json.Unmarshal(pack.Body, &fileBody); err != nil {
 		return nil
 	}
-
+	status := userCache.GetUserLoginStatus(fileBody.UserName)
+	if status != PackManager.LoginStatus {
+		return nil
+	}
 	newChannelCache.FileChanMap[fileBody.FileMD5] <- fileBody
 
 	return pack
@@ -111,7 +142,10 @@ func SendFileCancel(pack *PackManager.Pack, conn net.Conn) (requestPack *PackMan
 	if err := json.Unmarshal(pack.Body, &fileBody); err != nil {
 		return nil
 	}
-
+	status := userCache.GetUserLoginStatus(fileBody.UserName)
+	if status != PackManager.LoginStatus {
+		return nil
+	}
 	newChannelCache.FileStopChanMap[fileBody.FileMD5] <- true
 	newChannelCache.ClearChannelCache(fileBody.FileMD5)
 
@@ -122,6 +156,10 @@ func SendFileCancel(pack *PackManager.Pack, conn net.Conn) (requestPack *PackMan
 func SendFileEnd(pack *PackManager.Pack, conn net.Conn) (requestPack *PackManager.Pack) {
 	fileBody := PackManager.FileBody{}
 	if err := json.Unmarshal(pack.Body, &fileBody); err != nil {
+		return nil
+	}
+	status := userCache.GetUserLoginStatus(fileBody.UserName)
+	if status != PackManager.LoginStatus {
 		return nil
 	}
 	newChannelCache.FileChanMap[fileBody.FileMD5] <- fileBody

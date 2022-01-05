@@ -23,9 +23,11 @@ void TcpClient::sendLogin(QString ip, int port, LoginBody body)
     connect(m_socket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &TcpClient::slotDisconnect);
 }
 
-void TcpClient::sendLogout()
+void TcpClient::sendLogout(LoginBody body)
 {
-
+    Pack pack(body,Logout,0);
+    auto data = pack.toByte();
+    m_socket->write(data);
 }
 
 void TcpClient::sendMsg(MsgBody body, int method, int methodType)
@@ -98,6 +100,8 @@ void TcpClient::receiveData()
             body = m_packProcess.parseLoginPack(arr);
             signLoginStatus(body.LoginStatus,body.LoginStatus ? "登录成功":"登录失败");
 
+        }else if(method == Logout){
+            signLoginStatus(0," user logout");
         }else if(method == Msg){
             MsgBody body;
             body = m_packProcess.parseMsgPack(arr);

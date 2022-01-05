@@ -17,7 +17,7 @@ public:
 signals:
     void signLogin(QString  ip,int port ,LoginBody body);
 
-    void signLogout();
+    void signLogout(LoginBody body);
 
     void signSendMsg(MsgBody body, int method ,int methodType);
 
@@ -50,6 +50,7 @@ private:
 
 private:
     Ui::MainWindow *ui;
-    TcpClient   *m_tcpClient;
+    TcpClient   *   m_tcpClient;
+    int             m_loginStatus = 0;
 };
 #endif // MAINWINDOW_H

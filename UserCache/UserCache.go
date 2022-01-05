@@ -1,11 +1,15 @@
-package PackManager
+package UserCache
 
-import "errors"
+import (
+	"errors"
+	"testserver/PackManager"
+)
 
 type UserCache struct {
-	userCacheMap    map[string]LoginBody
-	loginNumber     int
-	userLoginStatus map[string]int
+	userCacheMap     map[string]PackManager.LoginBody
+	loginNumber      int
+	userLoginStatus  map[string]int
+	userLoginAddress map[string]string
 }
 
 const (
@@ -15,11 +19,12 @@ const (
 
 func NewUserCache() (cache *UserCache) {
 	cache = &UserCache{
-		make(map[string]LoginBody),
+		make(map[string]PackManager.LoginBody),
 		0,
 		make(map[string]int),
+		make(map[string]string),
 	}
-	body := LoginBody{}
+	body := PackManager.LoginBody{}
 	body.UserName = "test"
 	body.PassWord = "test"
 	cache.userCacheMap["test"] = body
@@ -36,6 +41,14 @@ func (userCache *UserCache) GetOnlineUsers() string {
 	return keys
 }
 
+func (userCache *UserCache) GetUserLoginStatusMap() map[string]int {
+	return userCache.userLoginStatus
+}
+
+func (userCache *UserCache) GetUserLoginAddressMap() map[string]string {
+	return userCache.userLoginAddress
+}
+
 func (userCache *UserCache) GetUserPassword(userName string) (string, error) {
 	body, exist := userCache.userCacheMap[userName]
 
@@ -46,12 +59,25 @@ func (userCache *UserCache) GetUserPassword(userName string) (string, error) {
 	return "", errors.New("user does not exist")
 }
 
-func (userCache *UserCache) AddUserCache(userId string, LoginCache LoginBody) {
+func (userCache *UserCache) AddUserCache(userId string, LoginCache PackManager.LoginBody, Address string) {
 	userCache.userCacheMap[userId] = LoginCache
+	userCache.userLoginAddress[userId] = Address
 }
 
 func (userCache *UserCache) DelUserCache(userId string) {
-	delete(userCache.userCacheMap, userId)
+	delete(userCache.userLoginStatus, userId)
+	delete(userCache.userLoginAddress, userId)
+}
+func (userCache *UserCache) DelUserCacheForIp(ip string) {
+
+	var userName string
+	for k, v := range userCache.userLoginAddress {
+		if v == ip {
+			userName = k
+		}
+	}
+	delete(userCache.userLoginStatus, userName)
+	delete(userCache.userLoginAddress, userName)
 }
 
 func (userCache *UserCache) UpdateUserLoginStatus(userName string, status int) {

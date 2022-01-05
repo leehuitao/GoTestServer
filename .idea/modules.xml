@@ -14,6 +14,7 @@
       <module fileurl="file://$PROJECT_DIR$/PackManager/PackManager.iml" filepath="$PROJECT_DIR$/PackManager/PackManager.iml" />
       <module fileurl="file://$PROJECT_DIR$/DBIO/RedisManager/RedisManager.iml" filepath="$PROJECT_DIR$/DBIO/RedisManager/RedisManager.iml" />
       <module fileurl="file://$PROJECT_DIR$/Task/Task.iml" filepath="$PROJECT_DIR$/Task/Task.iml" />
+      <module fileurl="file://$PROJECT_DIR$/UserCache/UserCache.iml" filepath="$PROJECT_DIR$/UserCache/UserCache.iml" />
       <module fileurl="file://$PROJECT_DIR$/Utils/Utils.iml" filepath="$PROJECT_DIR$/Utils/Utils.iml" />
     </modules>
   </component>

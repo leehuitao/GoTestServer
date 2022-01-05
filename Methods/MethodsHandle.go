@@ -1,33 +1,12 @@
 package Methods
 
 import (
-	"bytes"
-	"encoding/binary"
 	"encoding/json"
-	"fmt"
 	"net"
 	"testserver/PackManager"
+	"testserver/UserCache"
 	"testserver/Utils"
 )
-
-var newChannelCache = Utils.NewChannelCache()
-var userCache = PackManager.NewUserCache()
-
-func intToBytes(n int) []byte {
-	x := int32(n)
-	bytesBuffer := bytes.NewBuffer([]byte{})
-	binary.Write(bytesBuffer, binary.BigEndian, x)
-	return bytesBuffer.Bytes()
-}
-
-func createSendBuffer(pack PackManager.Pack) []byte {
-	var buffer bytes.Buffer //Buffer是一个实现了读写方法的可变大小的字节缓冲
-	buffer.Write(intToBytes(PackManager.HeaderSize + len(pack.Body)))
-	buffer.Write(intToBytes(pack.Header.Method))
-	buffer.Write(intToBytes(pack.Header.MethodType))
-	buffer.Write(pack.Body)
-	return buffer.Bytes()
-}
 
 // SendLogin 登录
 func SendLogin(pack *PackManager.Pack, conn net.Conn) (requestPack *PackManager.Pack) {
@@ -35,8 +14,6 @@ func SendLogin(pack *PackManager.Pack, conn net.Conn) (requestPack *PackManager.
 	if err := json.Unmarshal(pack.Body, &loginBody); err != nil {
 		return nil
 	}
-	fmt.Println(loginBody)
-
 	password, err := userCache.GetUserPassword(loginBody.UserName)
 
 	resPack := PackManager.Pack{}
@@ -48,7 +25,9 @@ func SendLogin(pack *PackManager.Pack, conn net.Conn) (requestPack *PackManager.
 	}
 	if loginBody.PassWord == password {
 		loginBody.LoginStatus = 1
-		userCache.UpdateUserLoginStatus(loginBody.UserName, PackManager.LoginStatus)
+		NoticeAllOnlineUserChangeStatus(loginBody.UserName, UserCache.LoginStatus)
+		userCache.UpdateUserLoginStatus(loginBody.UserName, UserCache.LoginStatus)
+		userCache.AddUserCache(loginBody.UserName, loginBody, conn.RemoteAddr().String())
 	} else {
 		loginBody.LoginStatus = 0
 	}
@@ -60,22 +39,6 @@ func SendLogin(pack *PackManager.Pack, conn net.Conn) (requestPack *PackManager.
 	return pack
 }
 
-func SendOnlineUserList(UserName string, conn net.Conn) (requestPack *PackManager.Pack) {
-	status := userCache.GetUserLoginStatus(UserName)
-	if status != PackManager.LoginStatus {
-		return nil
-	}
-	onlineList := userCache.GetOnlineUsers()
-	b := []byte(onlineList)
-	resPack := PackManager.Pack{}
-	resPack.Header.Method = PackManager.OnlineUserList
-	resPack.Header.MethodType = 0
-	resPack.Body = b
-	data := createSendBuffer(resPack)
-	conn.Write(data)
-	return nil
-}
-
 // SendLogout 登出
 func SendLogout(pack *PackManager.Pack, conn net.Conn) (requestPack *PackManager.Pack) {
 	loginBody := PackManager.LoginBody{}
@@ -83,10 +46,17 @@ func SendLogout(pack *PackManager.Pack, conn net.Conn) (requestPack *PackManager
 		return nil
 	}
 	status := userCache.GetUserLoginStatus(loginBody.UserName)
-	if status != PackManager.LoginStatus {
+	if status != UserCache.LoginStatus {
 		return nil
 	}
-	userCache.UpdateUserLoginStatus(loginBody.UserName, PackManager.LogoffStatus)
+	userCache.DelUserCache(loginBody.UserName)
+	resPack := PackManager.Pack{}
+	resPack.Header.Method = pack.Header.Method
+	resPack.Header.MethodType = 0
+	resPack.Body = []byte{}
+	data := createSendBuffer(resPack)
+	conn.Write(data)
+	NoticeAllOnlineUserChangeStatus(loginBody.UserName, UserCache.LogoffStatus)
 	return pack
 }
 
@@ -97,7 +67,7 @@ func SendMsg(pack *PackManager.Pack, conn net.Conn) (requestPack *PackManager.Pa
 		return nil
 	}
 	status := userCache.GetUserLoginStatus(msgBody.UserName)
-	if status != PackManager.LoginStatus {
+	if status != UserCache.LoginStatus {
 		return nil
 	}
 	return pack
@@ -110,7 +80,7 @@ func SendStartFile(pack *PackManager.Pack, conn net.Conn) (requestPack *PackMana
 		return nil
 	}
 	status := userCache.GetUserLoginStatus(fileBody.UserName)
-	if status != PackManager.LoginStatus {
+	if status != UserCache.LoginStatus {
 		return nil
 	}
 	fileChannel := make(chan PackManager.FileBody, 5)
@@ -128,7 +98,7 @@ func SendFileData(pack *PackManager.Pack, conn net.Conn) (requestPack *PackManag
 		return nil
 	}
 	status := userCache.GetUserLoginStatus(fileBody.UserName)
-	if status != PackManager.LoginStatus {
+	if status != UserCache.LoginStatus {
 		return nil
 	}
 	newChannelCache.FileChanMap[fileBody.FileMD5] <- fileBody
@@ -143,7 +113,7 @@ func SendFileCancel(pack *PackManager.Pack, conn net.Conn) (requestPack *PackMan
 		return nil
 	}
 	status := userCache.GetUserLoginStatus(fileBody.UserName)
-	if status != PackManager.LoginStatus {
+	if status != UserCache.LoginStatus {
 		return nil
 	}
 	newChannelCache.FileStopChanMap[fileBody.FileMD5] <- true
@@ -159,7 +129,7 @@ func SendFileEnd(pack *PackManager.Pack, conn net.Conn) (requestPack *PackManage
 		return nil
 	}
 	status := userCache.GetUserLoginStatus(fileBody.UserName)
-	if status != PackManager.LoginStatus {
+	if status != UserCache.LoginStatus {
 		return nil
 	}
 	newChannelCache.FileChanMap[fileBody.FileMD5] <- fileBody

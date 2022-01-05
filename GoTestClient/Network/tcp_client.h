@@ -31,7 +31,7 @@ signals:
 public slots:
     void sendLogin(QString  ip,int port ,LoginBody body);
 
-    void sendLogout();
+    void sendLogout(LoginBody body);
 
     void sendMsg(MsgBody body, int method ,int methodType);
 

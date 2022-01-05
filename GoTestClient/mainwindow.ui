@@ -69,7 +69,7 @@
       <item>
        <widget class="QPushButton" name="login_btn">
         <property name="text">
-         <string>登录</string>
+         <string>login</string>
         </property>
        </widget>
       </item>

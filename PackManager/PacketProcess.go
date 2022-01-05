@@ -14,7 +14,8 @@ const (
 	SendFileCancel  = 105
 	SendFileSuccess = 106
 
-	OnlineUserList = 200
+	OnlineUserList   = 200
+	UpdateOnlineUser = 201
 )
 
 // Header -----------------一级协议包--------------------
@@ -79,6 +80,12 @@ type GroupBody struct {
 	DstGroupId string `json:"DstGroupId"`
 	Type       string `json:"Type"`
 	Msg        string `json:"Msg"`
+}
+
+// OnlineListBody  群组指令json
+type OnlineListBody struct {
+	UserName string `json:"UserName"`
+	Status   int    `json:"Status"`
 }
 
 // IntToBytes 整形转换成字节

@@ -22,15 +22,23 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_login_btn_clicked()
 {
-    QString ip = ui->ip->text();
-    int port   = ui->port->text().toInt();
-    LoginBody body;
-    body.UserName   = "test";
-    body.PassWord   = "test";
-    body.LoginTime  = getCurrentTimeSeconds();
-    body.MacAddress = getHostMacAddress();
-    body.Notice     = 0;
-    signLogin(ip,port,body);
+    if(m_loginStatus == 0){
+        QString ip = ui->ip->text();
+        int port   = ui->port->text().toInt();
+        LoginBody body;
+        body.UserName   = "test";
+        body.PassWord   = "test";
+        body.LoginTime  = getCurrentTimeSeconds();
+        body.MacAddress = getHostMacAddress();
+        body.Notice     = 0;
+        signLogin(ip,port,body);
+
+    }else{
+        LoginBody body;
+        body.UserName   = "test";
+        signLogout(body);
+    }
+
 }
 
 void MainWindow::on_sendmsg_btn_clicked()
@@ -61,10 +69,13 @@ void MainWindow::on_file_send_btn_clicked()
 
 void MainWindow::slotLoginStatus(int status, QString str)
 {
+    m_loginStatus = status;
     if(status){
         ui->login_status_lab->setStyleSheet("background-color: rgb(0, 255, 0);");
+        ui->login_btn->setText("quit");
     }else{
         ui->login_status_lab->setStyleSheet("background-color: rgb(255, 0, 0);");
+        ui->login_btn->setText("login");
     }
     ui->login_status_str_lab->setText(str);
 }
@@ -82,6 +93,7 @@ void MainWindow::slotRecvFileProgress(int totalsize, int currentsize, int sendst
 void MainWindow::slotRecvOnlineUserList(QString userList)
 {
     qDebug()<<__FUNCTION__<<userList;
+    ui->listWidget->clear();
     QStringList list = userList.split(",");
     for(auto it : list){
         if(!it.isEmpty()){

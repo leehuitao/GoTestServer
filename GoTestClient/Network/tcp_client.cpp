@@ -102,7 +102,7 @@ void TcpClient::receiveData()
 
         }else if(method == Logout){
             signLoginStatus(0," user logout");
-        }else if(method == Msg){
+        }else if(method == MsgMethod){
             MsgBody body;
             body = m_packProcess.parseMsgPack(arr);
             signRecvMsg(body);

@@ -36,9 +36,10 @@ MsgBody PacketProcess::parseMsgPack(QByteArray arr)
     }
     auto values = jsonDoc.object();
     MsgBody  msgBody;
-    msgBody.User = values.value("User").toString();
-    msgBody.UserID = values.value("UserID").toInt();
-    msgBody.MsgType = values.value("MsgType").toInt();
-    msgBody.UserMsg = values.value("UserMsg").toString();
+    msgBody.UserName    = values.value("UserName").toString();
+    msgBody.Msg         = values.value("Msg").toString();
+    msgBody.MsgType     = values.value("MsgType").toInt();
+    msgBody.DstUser     = values.value("DstUser").toString();
+    msgBody.DstUserID   = values.value("DstUserID").toInt();
     return msgBody;
 }

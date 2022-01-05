@@ -12,7 +12,7 @@
 #include <QDataStream>
 #define     Login 			 100
 #define     Logout 			 101
-#define     Msg				 102
+#define     MsgMethod		 102
 #define     StartSendFile	 103
 #define     SendFileData	 104
 #define     SendFileCancel	 105
@@ -36,10 +36,11 @@ static QString createUuid(){
 }
 
 struct MsgBody  {
-    QString     User;
-    int         UserID;
+    QString     UserName;
+    QString     DstUser;
+    int         DstUserID;
     int         MsgType;
-    QString     UserMsg;
+    QString     Msg;
 };
 
 struct FileBody  {
@@ -78,7 +79,21 @@ struct Pack  {
     //数据体
     QByteArray  Body;
 
-    Pack(MsgBody body, int method ,int methodType){}
+    Pack(MsgBody body, int method ,int methodType){
+        QJsonObject json;//构建json对象json
+        json.insert("UserName", body.UserName);
+        json.insert("DstUser", body.DstUser);
+        json.insert("DstUserID", body.DstUserID);
+        json.insert("MsgType", body.MsgType);
+        json.insert("Msg", body.Msg);
+        QJsonDocument document;
+        document.setObject(json);
+        QByteArray byte_array = document.toJson(QJsonDocument::Compact);
+        Body = byte_array;
+        Header.Method = method;
+        Header.MethodType = methodType;
+        Header.PackSize =HeaderSize +   Body.size();
+    }
     Pack(FileBody body, int method ,int methodType){}
     Pack(LoginBody body, int method ,int methodType){
         QJsonObject json;//构建json对象json

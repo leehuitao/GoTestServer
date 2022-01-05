@@ -40,11 +40,18 @@ func ClientInit() {
 	ClientManagerHandle.clientMap = make(map[string]TcpClient)
 }
 func (clientManager *ClientManager) AddConn(tcpClient TcpClient) {
-	ClientManagerHandle.clientMap[tcpClient.ip] = tcpClient
+	ClientManagerHandle.clientMap[tcpClient.conn.RemoteAddr().String()] = tcpClient
 }
 
 func (clientManager *ClientManager) DelConn(ip string) {
 	delete(ClientManagerHandle.clientMap, ip)
+}
+
+func (clientManager *ClientManager) GetConn(UserName string) TcpClient {
+	addr := userCache.GetUserLoginAddressMap()
+	ipPort := addr[UserName]
+	client := clientManager.clientMap[ipPort]
+	return client
 }
 
 func (clientManager *ClientManager) SendToConn(ip string, pack []byte) {

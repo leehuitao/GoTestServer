@@ -52,5 +52,6 @@ private:
     Ui::MainWindow *ui;
     TcpClient   *   m_tcpClient;
     int             m_loginStatus = 0;
+    QString         m_currentChoiseUser;
 };
 #endif // MAINWINDOW_H

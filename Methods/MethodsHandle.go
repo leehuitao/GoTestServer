@@ -70,6 +70,12 @@ func SendMsg(pack *PackManager.Pack, conn net.Conn) (requestPack *PackManager.Pa
 	if status != UserCache.LoginStatus {
 		return nil
 	}
+
+	getConn := ClientManagerHandle.GetConn(msgBody.DstUser)
+	data := createSendBuffer(*pack)
+	if getConn.conn != nil {
+		getConn.conn.Write(data)
+	}
 	return pack
 }
 

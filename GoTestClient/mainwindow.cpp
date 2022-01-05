@@ -32,7 +32,6 @@ void MainWindow::on_login_btn_clicked()
         body.MacAddress = getHostMacAddress();
         body.Notice     = 0;
         signLogin(ip,port,body);
-
     }else{
         LoginBody body;
         body.UserName   = "test";
@@ -43,7 +42,13 @@ void MainWindow::on_login_btn_clicked()
 
 void MainWindow::on_sendmsg_btn_clicked()
 {
-
+    MsgBody body;
+    body.UserName   = "test";
+    body.DstUser    = m_currentChoiseUser;
+    body.DstUserID  = 123;
+    body.Msg        = ui->msg_send_edit->text();
+    body.MsgType    = 0;
+    signSendMsg(body,MsgMethod,0);
 }
 
 void MainWindow::on_file_select_btn_clicked()
@@ -80,9 +85,9 @@ void MainWindow::slotLoginStatus(int status, QString str)
     ui->login_status_str_lab->setText(str);
 }
 
-void MainWindow::slotRecvMsg(MsgBody)
+void MainWindow::slotRecvMsg(MsgBody body)
 {
-
+    qDebug()<<__FUNCTION__<<body.Msg;
 }
 
 void MainWindow::slotRecvFileProgress(int totalsize, int currentsize, int sendstatus)
@@ -147,4 +152,5 @@ void MainWindow::init(){
 void MainWindow::on_listWidget_currentTextChanged(const QString &currentText)
 {
     qDebug()<<__FUNCTION__<<currentText<<" clicked ";
+    m_currentChoiseUser = currentText;
 }

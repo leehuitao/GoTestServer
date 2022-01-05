@@ -85,8 +85,10 @@ func (client *TcpClient) StartRead(conn net.Conn) {
 		n, err := conn.Read(buf)
 		if n == 0 {
 			fmt.Println("客户端已关闭，断开连接")
+			UserName := userCache.GetUserNameFromIpPort(conn.RemoteAddr().String())
+			NoticeAllOnlineUserChangeStatus(UserName, UserCache.LogoffStatus)
 			ClientManagerHandle.DelConn(conn.RemoteAddr().String())
-			userCache.DelUserCacheForIp(conn.RemoteAddr().String())
+			userCache.DelUserCache(UserName)
 			return
 		}
 		if err != nil {

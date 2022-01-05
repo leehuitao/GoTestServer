@@ -18,7 +18,11 @@
 #define     SendFileCancel	 105
 #define     SendFileSuccess	 106
 #define     OnlineUserList   200
+#define     UpdateOnlineUser 201
 #define HeaderSize 12
+
+#define     UserLogoffStatus    0
+#define     UserLoginStatus     1
 static QString createFileMd5(QString filePath){
     QString sMd5;
     QFile file(filePath);
@@ -62,6 +66,12 @@ struct LoginBody  {
     QString     LoginTime  ;
     int         LoginStatus = 0;
 };
+
+struct OnlineListBody  {
+    QString     UserName;
+    int         Status;
+};
+
 
 // Header 协议头
 struct Header  {

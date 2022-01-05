@@ -112,6 +112,12 @@ void TcpClient::receiveData()
             qDebug()<<"SendFileData";
             QString userList(arr);
             signOnlineUserList(userList);
+        }else if(method == UpdateOnlineUser){
+            qDebug()<<"SendFileData";
+            QString userList(arr);
+            OnlineListBody body;
+            body = m_packProcess.parseOnlineListBodyPack(arr);
+            signOnlineUserUpdate(body);
         }
         delete [] rbytes;
         buffer = m_buffer.right(totalLen - size);

@@ -107,6 +107,19 @@ void MainWindow::slotRecvOnlineUserList(QString userList)
     }
 }
 
+void MainWindow::slotOnlineUserUpdate(OnlineListBody body)
+{
+    if(body.Status == UserLoginStatus){
+        ui->listWidget->addItem(body.UserName);
+    }else if(body.Status == UserLogoffStatus){
+        auto item = ui->listWidget->findItems(body.UserName,Qt::MatchExactly);
+        if(item.size() == 1){
+            ui->listWidget->removeItemWidget(item.at(0));
+            delete item.at(0);
+        }
+    }
+}
+
 QString MainWindow::getCurrentTimeSeconds()
 {
     QDateTime current_date_time =QDateTime::currentDateTime();
@@ -144,6 +157,7 @@ void MainWindow::init(){
     connect(m_tcpClient ,&TcpClient::signRecvMsg,           this,&MainWindow::slotRecvMsg                   ,Qt::QueuedConnection);
     connect(m_tcpClient ,&TcpClient::signRecvFileProgress,  this,&MainWindow::slotRecvFileProgress          ,Qt::QueuedConnection);
     connect(m_tcpClient ,&TcpClient::signOnlineUserList,    this,&MainWindow::slotRecvOnlineUserList        ,Qt::QueuedConnection);
+    connect(m_tcpClient ,&TcpClient::signOnlineUserUpdate,  this,&MainWindow::slotOnlineUserUpdate          ,Qt::QueuedConnection);
 
     m_tcpClient->moveToThread(t1);
     t1->start();

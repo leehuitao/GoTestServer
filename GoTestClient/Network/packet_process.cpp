@@ -43,3 +43,19 @@ MsgBody PacketProcess::parseMsgPack(QByteArray arr)
     msgBody.DstUserID   = values.value("DstUserID").toInt();
     return msgBody;
 }
+
+OnlineListBody PacketProcess::parseOnlineListBodyPack(QByteArray arr)
+{
+    QJsonParseError jsonError;
+    QJsonDocument jsonDoc(QJsonDocument::fromJson(arr, &jsonError));
+    if(jsonError.error != QJsonParseError::NoError)
+    {
+        qDebug() << "json error!" << jsonError.errorString();
+        return OnlineListBody();
+    }
+    auto values = jsonDoc.object();
+    OnlineListBody  onlineListBody;
+    onlineListBody.UserName     = values.value("UserName").toString();
+    onlineListBody.Status       = values.value("Status").toInt();
+    return onlineListBody;
+}

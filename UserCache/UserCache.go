@@ -68,7 +68,18 @@ func (userCache *UserCache) DelUserCache(userId string) {
 	delete(userCache.userLoginStatus, userId)
 	delete(userCache.userLoginAddress, userId)
 }
-func (userCache *UserCache) DelUserCacheForIp(ip string) {
+
+func (userCache *UserCache)GetUserNameFromIpPort(ipPort string) string {
+	var userName string
+	for k, v := range userCache.userLoginAddress {
+		if v == ipPort {
+			userName = k
+		}
+	}
+	return userName
+}
+
+func (userCache *UserCache) DelUserCacheForIpPort(ip string) {
 
 	var userName string
 	for k, v := range userCache.userLoginAddress {

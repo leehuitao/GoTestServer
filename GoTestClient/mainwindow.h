@@ -39,6 +39,9 @@ private slots:
 
     void slotRecvOnlineUserList(QString userList);
 
+
+    void slotOnlineUserUpdate(OnlineListBody body);
+
     QString getCurrentTimeSeconds();
 
     QString getHostMacAddress();

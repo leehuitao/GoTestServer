@@ -82,7 +82,7 @@ type GroupBody struct {
 	Msg        string `json:"Msg"`
 }
 
-// OnlineListBody  群组指令json
+// OnlineListBody  用户状态更新json
 type OnlineListBody struct {
 	UserName string `json:"UserName"`
 	Status   int    `json:"Status"`

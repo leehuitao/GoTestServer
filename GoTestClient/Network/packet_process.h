@@ -11,6 +11,8 @@ public:
     LoginBody parseLoginPack(QByteArray arr);
 
     MsgBody parseMsgPack(QByteArray arr);
+
+    OnlineListBody parseOnlineListBodyPack(QByteArray arr);
 };
 
 #endif // PACKETPROCESS_H

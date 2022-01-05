@@ -37,8 +37,14 @@ private slots:
 
     void slotRecvFileProgress(int totalsize,int currentsize,int sendstatus);
 
+    void slotRecvOnlineUserList(QString userList);
+
     QString getCurrentTimeSeconds();
+
     QString getHostMacAddress();
+
+    void on_listWidget_currentTextChanged(const QString &currentText);
+
 private:
     void init();
 

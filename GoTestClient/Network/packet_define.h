@@ -17,7 +17,7 @@
 #define     SendFileData	 104
 #define     SendFileCancel	 105
 #define     SendFileSuccess	 106
-
+#define     OnlineUserList   200
 #define HeaderSize 12
 static QString createFileMd5(QString filePath){
     QString sMd5;

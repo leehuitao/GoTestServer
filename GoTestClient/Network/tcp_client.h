@@ -18,6 +18,8 @@ public:
 
 signals:
     void signLoginStatus(int status,QString str = "");
+
+    void signOnlineUserList(QString userList);
     //500ms 向界面发送一次包防止一直刷新卡顿
     void signRecvMsgList(QList<MsgBody>);
 

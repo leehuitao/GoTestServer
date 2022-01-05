@@ -13,7 +13,7 @@ import (
 var newChannelCache = Utils.NewChannelCache()
 var userCache = PackManager.NewUserCache()
 
-func IntToBytes(n int) []byte {
+func intToBytes(n int) []byte {
 	x := int32(n)
 	bytesBuffer := bytes.NewBuffer([]byte{})
 	binary.Write(bytesBuffer, binary.BigEndian, x)
@@ -67,12 +67,12 @@ func SendOnlineUserList(UserName string, conn net.Conn) (requestPack *PackManage
 	}
 	onlineList := userCache.GetOnlineUsers()
 	b := []byte(onlineList)
-	var buffer bytes.Buffer
-	buffer.Write(IntToBytes(12 + len(b)))
-	buffer.Write(IntToBytes(PackManager.OnlineUserList))
-	buffer.Write(IntToBytes(0))
-	buffer.Write(b)
-	conn.Write(buffer.Bytes())
+	resPack := PackManager.Pack{}
+	resPack.Header.Method = PackManager.OnlineUserList
+	resPack.Header.MethodType = 0
+	resPack.Body = b
+	data := createSendBuffer(resPack)
+	conn.Write(data)
 	return nil
 }
 

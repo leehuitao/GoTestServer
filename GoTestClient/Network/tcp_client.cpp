@@ -104,6 +104,10 @@ void TcpClient::receiveData()
             signRecvMsg(body);
         }else if(method == SendFileData){
             qDebug()<<"SendFileData";
+        }else if(method == OnlineUserList){
+            qDebug()<<"SendFileData";
+            QString userList(arr);
+            signOnlineUserList(userList);
         }
         delete [] rbytes;
         buffer = m_buffer.right(totalLen - size);

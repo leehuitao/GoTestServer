@@ -79,6 +79,17 @@ void MainWindow::slotRecvFileProgress(int totalsize, int currentsize, int sendst
 
 }
 
+void MainWindow::slotRecvOnlineUserList(QString userList)
+{
+    qDebug()<<__FUNCTION__<<userList;
+    QStringList list = userList.split(",");
+    for(auto it : list){
+        if(!it.isEmpty()){
+            ui->listWidget->addItem(it);
+        }
+    }
+}
+
 QString MainWindow::getCurrentTimeSeconds()
 {
     QDateTime current_date_time =QDateTime::currentDateTime();
@@ -115,7 +126,13 @@ void MainWindow::init(){
     connect(m_tcpClient ,&TcpClient::signLoginStatus,       this,&MainWindow::slotLoginStatus               ,Qt::QueuedConnection);
     connect(m_tcpClient ,&TcpClient::signRecvMsg,           this,&MainWindow::slotRecvMsg                   ,Qt::QueuedConnection);
     connect(m_tcpClient ,&TcpClient::signRecvFileProgress,  this,&MainWindow::slotRecvFileProgress          ,Qt::QueuedConnection);
+    connect(m_tcpClient ,&TcpClient::signOnlineUserList,    this,&MainWindow::slotRecvOnlineUserList        ,Qt::QueuedConnection);
 
     m_tcpClient->moveToThread(t1);
     t1->start();
+}
+
+void MainWindow::on_listWidget_currentTextChanged(const QString &currentText)
+{
+    qDebug()<<__FUNCTION__<<currentText<<" clicked ";
 }

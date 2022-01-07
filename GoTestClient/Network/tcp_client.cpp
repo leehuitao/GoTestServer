@@ -39,7 +39,11 @@ void TcpClient::sendMsg(MsgBody body, int method, int methodType)
 
 void TcpClient::sendFile(FileBody body, int method, int methodType)
 {
-
+    m_fileThreadList = new FileThread();
+    m_fileThreadList->setFileData(body);
+    connect(this,&TcpClient::signContinueSendFile,m_fileThreadList,&FileThread::slotContinue,Qt::QueuedConnection);
+    connect(m_fileThreadList,&FileThread::signSendFileData,this,&TcpClient::sendFileData,Qt::QueuedConnection);
+    m_fileThreadList->start();
 }
 
 void TcpClient::init()
@@ -106,14 +110,17 @@ void TcpClient::receiveData()
             MsgBody body;
             body = m_packProcess.parseMsgPack(arr);
             signRecvMsg(body);
-        }else if(method == SendFileData){
+        }else if(method == ContinueSendFileData){
+            FileBody body;
+            body = m_packProcess.parseFileDataPack(arr);
+            signContinueSendFile(ContinueSendFileData,body);
             qDebug()<<"SendFileData";
         }else if(method == OnlineUserList){
-            qDebug()<<"SendFileData";
+            qDebug()<<"OnlineUserList";
             QString userList(arr);
             signOnlineUserList(userList);
         }else if(method == UpdateOnlineUser){
-            qDebug()<<"SendFileData";
+            qDebug()<<"UpdateOnlineUser";
             QString userList(arr);
             OnlineListBody body;
             body = m_packProcess.parseOnlineListBodyPack(arr);
@@ -124,4 +131,18 @@ void TcpClient::receiveData()
         totalLen = buffer.size();
         m_buffer = buffer;
     }
+}
+
+void TcpClient::sendFileData(int method, FileBody body)
+{
+    if(method == ContinueSendFileData){
+        Pack pack(body,method,0,1);
+        auto data = pack.toByte();
+        m_socket->write(data);
+    }else {
+        Pack pack(body,method,0);
+        auto data = pack.toByte();
+        m_socket->write(data);
+    }
+
 }

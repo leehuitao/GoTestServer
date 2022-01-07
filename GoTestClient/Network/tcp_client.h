@@ -8,7 +8,7 @@
 #include <QTcpServer>
 #include <QTcpSocket>
 #include "packet_process.h"
-
+#include "../File/file_thread.h"
 
 class TcpClient: public QObject
 {
@@ -29,6 +29,8 @@ signals:
     //发送到 文件线程
     void signRecvFile(FileBody);
 
+    void signContinueSendFile(int,FileBody);
+
     void signRecvFileProgress(int totalsize,int currentsize,int sendstatus);
 public slots:
     void sendLogin(QString  ip,int port ,LoginBody body);
@@ -47,14 +49,16 @@ private slots:
 
     void receiveData();
 
+    void sendFileData(int method ,FileBody body );
 private:
-    QTcpSocket *    m_socket = nullptr;
-    QList<MsgBody>  m_MsgCache;
-    QByteArray      m_buffer;
-    PacketProcess   m_packProcess;
-    QString         m_serverip;
-    int             m_serverport;
-    LoginBody       m_loginBody;
+    QTcpSocket *            m_socket = nullptr;
+    QList<MsgBody>          m_MsgCache;
+    QByteArray              m_buffer;
+    PacketProcess           m_packProcess;
+    QString                 m_serverip;
+    int                     m_serverport;
+    LoginBody               m_loginBody;
+    FileThread              *m_fileThreadList;
 };
 
 #endif // TCPCLIENT_H

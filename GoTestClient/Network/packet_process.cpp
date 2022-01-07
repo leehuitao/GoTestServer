@@ -59,3 +59,25 @@ OnlineListBody PacketProcess::parseOnlineListBodyPack(QByteArray arr)
     onlineListBody.Status       = values.value("Status").toInt();
     return onlineListBody;
 }
+
+FileBody PacketProcess::parseFileDataPack(QByteArray arr)
+{
+    QJsonParseError jsonError;
+    QJsonDocument jsonDoc(QJsonDocument::fromJson(arr, &jsonError));
+    if(jsonError.error != QJsonParseError::NoError)
+    {
+        qDebug() << "json error!" << jsonError.errorString();
+        return FileBody();
+    }
+    auto values = jsonDoc.object();
+    FileBody  fileBody;
+    fileBody.UserName       = values.value("UserName").toString();
+    fileBody.FileName       = values.value("FileName").toString();
+    fileBody.FileMD5        = values.value("FileMD5").toString();
+    fileBody.TotalSize      = values.value("TotalSize").toInt();
+    fileBody.CurrentSize    = values.value("CurrentSize").toInt();
+    fileBody.DstUserName    = values.value("DstUserName").toString();
+    fileBody.SendStatus     = values.value("SendStatus").toInt();
+    fileBody.FileData       = (char*)values.value("FileData").toVariant().data();
+    return fileBody;
+}

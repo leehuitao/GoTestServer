@@ -3,6 +3,8 @@ package PackManager
 import (
 	"bytes"
 	"encoding/binary"
+	"strconv"
+	"testserver/LogService"
 )
 
 const (
@@ -53,7 +55,7 @@ type FileBody struct {
 	FileMD5     string `json:"FileMD5"`
 	TotalSize   int    `json:"TotalSize"`
 	CurrentSize int    `json:"CurrentSize"`
-	DstUserID   int    `json:"DstUserID"`
+	DstUserName string `json:"DstUserName"`
 	SendStatus  int    `json:"SendStatus"`
 	FileData    []byte `json:"FileData"`
 }
@@ -121,6 +123,8 @@ func Decode(start int, b []byte) (proto *Pack) {
 	pack.Header.PackSize = int(sizeInt)
 	cmd := b[start+4 : start+8]
 	cmdInt := binary.BigEndian.Uint32(cmd)
+	cmdLog := "rec cmd = " + strconv.Itoa(int(cmdInt))
+	LogService.LogDebug(cmdLog)
 	pack.Header.Method = int(cmdInt)
 	cmdType := b[start+8 : start+12]
 	cmdTypeInt := binary.BigEndian.Uint32(cmdType)

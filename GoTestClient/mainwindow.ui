@@ -102,7 +102,11 @@
        </widget>
       </item>
       <item>
-       <widget class="QLineEdit" name="msg_send_edit"/>
+       <widget class="QLineEdit" name="msg_send_edit">
+        <property name="text">
+         <string>123</string>
+        </property>
+       </widget>
       </item>
       <item>
        <spacer name="horizontalSpacer_3">
@@ -160,7 +164,11 @@
        </widget>
       </item>
       <item>
-       <widget class="QLineEdit" name="file_send_edit"/>
+       <widget class="QLineEdit" name="file_send_edit">
+        <property name="text">
+         <string>F:/yiheng/GoTestServer/build-GoTestClient-Desktop_Qt_5_13_2_MSVC2017_64bit-Debug/ui_mainwindow.h</string>
+        </property>
+       </widget>
       </item>
       <item>
        <spacer name="horizontalSpacer_4">

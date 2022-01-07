@@ -10,15 +10,16 @@
 #include <QJsonValue>
 #include <QJsonArray>
 #include <QDataStream>
-#define     Login 			 100
-#define     Logout 			 101
-#define     MsgMethod		 102
-#define     StartSendFile	 103
-#define     SendFileData	 104
-#define     SendFileCancel	 105
-#define     SendFileSuccess	 106
-#define     OnlineUserList   200
-#define     UpdateOnlineUser 201
+#include <QDebug>
+#define     Login                       100
+#define     Logout                      101
+#define     MsgMethod                   102
+#define     StartSendFile               103
+#define     ContinueSendFileData        104
+#define     SendFileCancel              105
+#define     SendFileSuccess             106
+#define     OnlineUserList              200
+#define     UpdateOnlineUser            201
 #define HeaderSize 12
 
 #define     UserLogoffStatus    0
@@ -48,13 +49,14 @@ struct MsgBody  {
 };
 
 struct FileBody  {
-    QString     FileName      ;
-    QString     FileMD5       ;
-    int         TotalSize     ;
-    int         CurrentSize   ;
-    int         DstUserID     ;
-    int         SendStatus    ;
-    QByteArray  FileData      ;
+    QString         UserName      ;
+    QString         FileName      ;
+    QString         FileMD5       ;
+    int             TotalSize     ;
+    int             CurrentSize   ;
+    QString         DstUserName   ;
+    int             SendStatus    ;
+    QByteArray      FileData      ;
 };
 
 // LoginBody
@@ -104,8 +106,40 @@ struct Pack  {
         Header.MethodType = methodType;
         Header.PackSize =HeaderSize +   Body.size();
     }
-    Pack(FileBody body, int method ,int methodType){}
+    Pack(FileBody body, int method ,int methodType,bool isData = 0){
+        if( isData == 0){
+            QJsonObject json;//构建json对象json
+            json.insert("UserName", body.UserName);
+            json.insert("FileName", body.FileName);
+            json.insert("FileMD5", body.FileMD5);
+            json.insert("TotalSize", body.TotalSize);
+            json.insert("CurrentSize", body.CurrentSize);
+            json.insert("DstUserName", body.DstUserName);
+            json.insert("SendStatus", body.SendStatus);
+            json.insert("FileData", body.FileData.data());
+            QJsonDocument document;
+            document.setObject(json);
+            QByteArray byte_array = document.toJson(QJsonDocument::Compact);
+            Body = byte_array;
+            Header.Method = method;
+            Header.MethodType = methodType;
+            Header.PackSize =HeaderSize +   Body.size();
+        }else{
+            QDataStream packet(&Body,QIODevice::WriteOnly);
+            QByteArray name(body.UserName.toUtf8().data());
+            QByteArray md5(body.FileMD5.toUtf8().data());
+            packet<<name.size();
+            packet<<md5.size();
+            Body +=  name;
+            Body += md5;
+            Body += body.FileData;
+            Header.Method = method;
+            Header.MethodType = methodType;
+            Header.PackSize =HeaderSize +   Body.size();
+        }
+    }
     Pack(LoginBody body, int method ,int methodType){
+
         QJsonObject json;//构建json对象json
         json.insert("UserName", body.UserName);
         json.insert("PassWord", body.PassWord);
@@ -120,13 +154,16 @@ struct Pack  {
         Header.Method = method;
         Header.MethodType = methodType;
         Header.PackSize =HeaderSize +   Body.size();
+
+
     }
 
     QByteArray toByte(){
         QByteArray m_buffer;
         QDataStream packet(&m_buffer,QIODevice::WriteOnly);
         packet<<Header.PackSize<<Header.Method<<Header.MethodType;
-        m_buffer += Body.data();
+        m_buffer += Body;
+        qDebug()<<"m_buffer size = "<<m_buffer.size()<<"Body size = "<<Body.size();
         return m_buffer;
     }
 };

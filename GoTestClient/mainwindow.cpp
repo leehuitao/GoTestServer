@@ -53,11 +53,6 @@ void MainWindow::on_sendmsg_btn_clicked()
 
 void MainWindow::on_file_select_btn_clicked()
 {
-
-}
-
-void MainWindow::on_file_send_btn_clicked()
-{
     QFileDialog *fileDialog = new QFileDialog(this);
     fileDialog->setWindowTitle(QStringLiteral("选中文件"));
     fileDialog->setDirectory(".");
@@ -70,6 +65,17 @@ void MainWindow::on_file_send_btn_clicked()
     }
     if(fileNames.size()>0)
         ui->file_send_edit->setText(fileNames.at(0));
+}
+
+void MainWindow::on_file_send_btn_clicked()
+{
+    QString path = ui->file_send_edit->text();
+    FileBody body;
+    body.UserName = "test";
+    body.FileName = path;
+    body.DstUserName = m_currentChoiseUser;
+    body.FileMD5 = createFileMd5(path);
+    signSendFile(body,StartSendFile,0);
 }
 
 void MainWindow::slotLoginStatus(int status, QString str)

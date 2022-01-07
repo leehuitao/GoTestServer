@@ -13,24 +13,25 @@ class FileThread : public QThread
 public:
     explicit FileThread(QObject *parent = nullptr);
 
-    void setFileData(QString filePath);
+    void setFileData(FileBody);
 protected:
     void run() override;
-
 signals:
-    void signSendFileData(FileBody );
+    void signSendFileData(int,FileBody);
 public slots:
-    void slotContinue(int ,FileBody );
+    void slotContinue(int,FileBody );
 private:
     QString             m_filePath;
     QString             m_fileMd5;
     int                 m_fileTotalSize;
-    int                 m_fileCurrentSize;
+    int                 m_fileCurrentSize = 0;
     QMutex              m_mutex;
     QWaitCondition      m_condition;
     FileBody            m_recvFileBody;
     int                 m_method=0;
     QFile *             m_file;
+    QString             m_dstUser;
+    QString             m_userName;
 };
 
 #endif // FILETHREAD_H

@@ -1,6 +1,7 @@
 package Methods
 
 import (
+	"encoding/binary"
 	"encoding/json"
 	"net"
 	"testserver/PackManager"
@@ -89,26 +90,36 @@ func SendStartFile(pack *PackManager.Pack, conn net.Conn) (requestPack *PackMana
 	if status != UserCache.LoginStatus {
 		return nil
 	}
-	fileChannel := make(chan PackManager.FileBody, 5)
+	fileChannel := make(chan []byte, 5)
 	quitChannel := make(chan bool)
 	go Utils.AliveFileWrite(fileChannel, quitChannel, fileBody.FileName, fileBody.FileMD5)
 	newChannelCache.AddNewChannelCache(fileBody.FileMD5, fileChannel, quitChannel)
-
+	pack.Header.Method = PackManager.SendFileData
+	data := createSendBuffer(*pack)
+	conn.Write(data)
 	return pack
 }
 
 // SendFileData  发送文件数据
 func SendFileData(pack *PackManager.Pack, conn net.Conn) (requestPack *PackManager.Pack) {
-	fileBody := PackManager.FileBody{}
-	if err := json.Unmarshal(pack.Body, &fileBody); err != nil {
-		return nil
-	}
-	status := userCache.GetUserLoginStatus(fileBody.UserName)
+	nameSizeData := pack.Body[0:4]
+	nameSize := binary.BigEndian.Uint32(nameSizeData)
+	md5SizeData := pack.Body[4:8]
+	md5Size := binary.BigEndian.Uint32(md5SizeData)
+	nameData := pack.Body[8 : 8+nameSize]
+	name := string(nameData)
+	md5Data := pack.Body[8+nameSize : 8+nameSize+md5Size]
+	md5 := string(md5Data)
+	status := userCache.GetUserLoginStatus(name)
 	if status != UserCache.LoginStatus {
 		return nil
 	}
-	newChannelCache.FileChanMap[fileBody.FileMD5] <- fileBody
 
+	fileData := pack.Body[8+nameSize+md5Size:]
+	newChannelCache.FileChanMap[md5] <- fileData
+	pack.Header.Method = PackManager.SendFileData
+	data := createSendBuffer(*pack)
+	conn.Write(data)
 	return pack
 }
 
@@ -138,7 +149,6 @@ func SendFileEnd(pack *PackManager.Pack, conn net.Conn) (requestPack *PackManage
 	if status != UserCache.LoginStatus {
 		return nil
 	}
-	newChannelCache.FileChanMap[fileBody.FileMD5] <- fileBody
 	newChannelCache.FileStopChanMap[fileBody.FileMD5] <- true
 	newChannelCache.ClearChannelCache(fileBody.FileMD5)
 

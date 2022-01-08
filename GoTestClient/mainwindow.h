@@ -50,7 +50,7 @@ private slots:
 
 private:
     void init();
-
+    void setBottom();
 private:
     Ui::MainWindow *ui;
     TcpClient   *   m_tcpClient;

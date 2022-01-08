@@ -19,18 +19,23 @@ SOURCES += \
     File/file_thread.cpp \
     Network/packet_process.cpp \
     Network/tcp_client.cpp \
+    app_cache.cpp \
     main.cpp \
     mainwindow.cpp \
+    message_box_widget.cpp
 
 HEADERS += \
     File/file_thread.h \
     Network/packet_define.h \
     Network/packet_process.h \
     Network/tcp_client.h \
+    app_cache.h \
     mainwindow.h \
+    message_box_widget.h
 
 FORMS += \
-    mainwindow.ui
+    mainwindow.ui \
+    message_box_widget.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

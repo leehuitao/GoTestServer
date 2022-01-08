@@ -1,17 +1,22 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-
+#include <QThread>
 #include <QDateTime>
 #include <QFileDialog>
 #include <QNetworkInterface>
+#include <QScrollBar>
 #include <QThread>
-
+#include "app_cache.h"
+#include "message_box_widget.h"
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
     init();
+    connect(ui->scrollArea->verticalScrollBar(),&QScrollBar::rangeChanged,[=](int min,int max){
+        ui->scrollArea->verticalScrollBar()->setValue(max);
+    });
 }
 
 MainWindow::~MainWindow()
@@ -49,6 +54,10 @@ void MainWindow::on_sendmsg_btn_clicked()
     body.Msg        = ui->msg_send_edit->text();
     body.MsgType    = 0;
     signSendMsg(body,MsgMethod,0);
+    MessageBoxWidget *w = new MessageBoxWidget(body,ui->scrollArea->width()-18);
+    ui->verticalLayout->insertWidget(AppCache::Instance()->m_msgSize++,w);
+    ui->scrollArea->ensureWidgetVisible(w);
+
 }
 
 void MainWindow::on_file_select_btn_clicked()
@@ -84,6 +93,7 @@ void MainWindow::slotLoginStatus(int status, QString str)
     if(status){
         ui->login_status_lab->setStyleSheet("background-color: rgb(0, 255, 0);");
         ui->login_btn->setText("quit");
+        AppCache::Instance()->m_userName = "test";
     }else{
         ui->login_status_lab->setStyleSheet("background-color: rgb(255, 0, 0);");
         ui->login_btn->setText("login");
@@ -93,6 +103,8 @@ void MainWindow::slotLoginStatus(int status, QString str)
 
 void MainWindow::slotRecvMsg(MsgBody body)
 {
+    MessageBoxWidget *w = new MessageBoxWidget(body,ui->scrollArea->width()-18);
+    ui->verticalLayout->insertWidget(AppCache::Instance()->m_msgSize++,w);
     qDebug()<<__FUNCTION__<<body.Msg;
 }
 
@@ -167,6 +179,16 @@ void MainWindow::init(){
 
     m_tcpClient->moveToThread(t1);
     t1->start();
+}
+
+void MainWindow::setBottom()
+{
+    QScrollBar *pScrollBar = ui->scrollArea->verticalScrollBar();
+    if (pScrollBar != nullptr)
+    {
+        int nMax = pScrollBar->maximum();
+        pScrollBar->setValue(nMax);
+    }
 }
 
 void MainWindow::on_listWidget_currentTextChanged(const QString &currentText)

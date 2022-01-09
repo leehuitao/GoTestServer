@@ -10,13 +10,22 @@ void registerStruct(){
     qRegisterMetaType<LoginBody>("LoginBody");
     qRegisterMetaType<FileBody>("FileBody");
     qRegisterMetaType<MsgBody>("MsgBody");
+    qRegisterMetaType<OnlineListBody>("OnlineListBody");
+
+
 }
 
 int main(int argc, char *argv[])
 {
+
+    qDebug() << "argc:" <<argc;
     QApplication a(argc, argv);
     registerStruct();
     MainWindow w;
+    if(argc == 2)
+    {
+        w.setUserName(argv[1]);
+    }
     w.show();
     return a.exec();
 }

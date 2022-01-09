@@ -8,6 +8,7 @@ import (
 	"net"
 	"strconv"
 	"strings"
+	"testserver/LogService"
 	"testserver/PackManager"
 	"testserver/UserCache"
 	"testserver/Utils"
@@ -55,7 +56,14 @@ func (clientManager *ClientManager) GetConn(UserName string) TcpClient {
 }
 
 func (clientManager *ClientManager) SendToConn(ip string, pack []byte) {
-	ClientManagerHandle.clientMap[ip].conn.Write(pack)
+	client, ok := ClientManagerHandle.clientMap[ip]
+	if ok {
+		_, err := client.conn.Write(pack)
+		if err != nil {
+			LogService.LogError("send to client error")
+			return
+		}
+	}
 }
 
 // UpdateConn 设置客户端连接以及其他信息
@@ -166,7 +174,7 @@ func NoticeAllOnlineUserChangeStatus(UserName string, status int) {
 	pack.Body = b
 	pack.Header.Method = PackManager.UpdateOnlineUser
 	pack.Header.MethodType = 0
-	data := pack.CreateBuffer()
+	data := createSendBuffer(pack)
 	userStatus := userCache.GetUserLoginStatusMap()
 	userAddress := userCache.GetUserLoginAddressMap()
 	for k, v := range userStatus {

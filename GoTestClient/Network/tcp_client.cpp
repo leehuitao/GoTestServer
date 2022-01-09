@@ -134,29 +134,6 @@ void TcpClient::receiveData()
                 qDebug()<<"file start recv error "<<body.FileName;
             }
         }else if(method == ContinueGetFile){
-            FileBody body;
-//            body = m_packProcess.parseFileDataPack(arr);
-            /*int fileNameBufferSize;
-            int fileMD5BufferSize;
-            int sendUserNameBufferSize;
-            //QString fileNameBuffer,fileMD5Buffer,sendUserNameBuffer;
-            char *cache = new char[4];
-            memcpy(cache,arr.data(),4);
-            fileNameBufferSize =  int(cache);
-            char *fileNameBuffer = new char[fileNameBufferSize];
-            memcpy(fileNameBuffer,arr.data()+4,fileNameBufferSize);
-
-            memcpy(cache,arr.data()+4+fileNameBufferSize,4);
-            fileMD5BufferSize =  int(cache);
-            char *fileMD5Buffer = new char[fileMD5BufferSize];
-            memcpy(fileMD5Buffer,arr.data()+8+fileNameBufferSize,fileMD5BufferSize);
-
-            memcpy(cache,arr.data()+8+fileNameBufferSize+fileMD5BufferSize,4);
-            sendUserNameBufferSize =  int(cache);
-            char *sendUserNameBuffer = new char[sendUserNameBufferSize];
-            memcpy(sendUserNameBuffer,arr.data()+12+fileNameBufferSize+fileMD5BufferSize,sendUserNameBufferSize);
-            //总包大小减去头大小减去前缀
-            int fileSize = size - HeaderSize - 12+fileNameBufferSize+fileMD5BufferSize+sendUserNameBufferSize;*/
             continueRecv(m_FileBodyCache);
             m_currentSize += arr.size();
             m_recvFile->write(rbytes,arr.size());
@@ -167,7 +144,7 @@ void TcpClient::receiveData()
             m_currentSize = 0;
             signRecvFileProgress(m_totalSize,m_totalSize,1);
             m_recvFile->close();
-            signRecvFileCompelte(m_FileBodyCache.FileName,m_FileBodyCache.DstUserName);
+            signRecvFileCompelte(m_FileBodyCache.FileName,m_FileBodyCache.UserName);
             qDebug()<<"SendFileSuccessfile write size = "<<size-HeaderSize;
         }else if(method == ContinueSendFileData){
             FileBody body;

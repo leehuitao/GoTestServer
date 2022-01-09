@@ -14,6 +14,8 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+
+    void setUserName(QString);
 signals:
     void signLogin(QString  ip,int port ,LoginBody body);
 
@@ -51,6 +53,8 @@ private slots:
     void on_listWidget_currentTextChanged(const QString &currentText);
 
     void slotRecvFileCompelte(QString filename,QString type);
+
+
 private:
     void init();
     void setBottom();
@@ -59,5 +63,6 @@ private:
     TcpClient   *   m_tcpClient;
     int             m_loginStatus = 0;
     QString         m_currentChoiseUser;
+    QString         m_userName;
 };
 #endif // MAINWINDOW_H

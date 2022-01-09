@@ -24,6 +24,11 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::setUserName(QString username)
+{
+    AppCache::Instance()->m_userName = username;
+}
+
 
 void MainWindow::on_login_btn_clicked()
 {
@@ -31,15 +36,15 @@ void MainWindow::on_login_btn_clicked()
         QString ip = ui->ip->text();
         int port   = ui->port->text().toInt();
         LoginBody body;
-        body.UserName   = "test";
-        body.PassWord   = "test";
+        body.UserName   = AppCache::Instance()->m_userName;
+        body.PassWord   = AppCache::Instance()->m_userName;
         body.LoginTime  = getCurrentTimeSeconds();
         body.MacAddress = getHostMacAddress();
         body.Notice     = 0;
         signLogin(ip,port,body);
     }else{
         LoginBody body;
-        body.UserName   = "test";
+        body.UserName   = AppCache::Instance()->m_userName;
         signLogout(body);
     }
 
@@ -48,7 +53,7 @@ void MainWindow::on_login_btn_clicked()
 void MainWindow::on_sendmsg_btn_clicked()
 {
     MsgBody body;
-    body.UserName   = "test";
+    body.UserName   = AppCache::Instance()->m_userName;
     body.DstUser    = m_currentChoiseUser;
     body.DstUserID  = 123;
     body.Msg        = ui->msg_send_edit->text();
@@ -80,7 +85,7 @@ void MainWindow::on_file_send_btn_clicked()
 {
     QString path = ui->file_send_edit->text();
     FileBody body;
-    body.UserName = "test";
+    body.UserName = AppCache::Instance()->m_userName;
     body.FileName = path;
     body.DstUserName = m_currentChoiseUser;
     body.FileMD5 = createFileMd5(path);
@@ -93,7 +98,6 @@ void MainWindow::slotLoginStatus(int status, QString str)
     if(status){
         ui->login_status_lab->setStyleSheet("background-color: rgb(0, 255, 0);");
         ui->login_btn->setText("quit");
-        AppCache::Instance()->m_userName = "test";
     }else{
         ui->login_status_lab->setStyleSheet("background-color: rgb(255, 0, 0);");
         ui->login_btn->setText("login");

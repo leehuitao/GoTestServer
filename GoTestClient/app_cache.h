@@ -25,7 +25,7 @@ public:
         }
         return instance_;
     }
-    QString m_userName;
+    QString m_userName = "test";
     int     m_msgSize=0;
 
 private:

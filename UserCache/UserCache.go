@@ -28,6 +28,9 @@ func NewUserCache() (cache *UserCache) {
 	body.UserName = "test"
 	body.PassWord = "test"
 	cache.userCacheMap["test"] = body
+	body.UserName = "test1"
+	body.PassWord = "test1"
+	cache.userCacheMap["test1"] = body
 	return cache
 
 }
@@ -69,7 +72,7 @@ func (userCache *UserCache) DelUserCache(userId string) {
 	delete(userCache.userLoginAddress, userId)
 }
 
-func (userCache *UserCache)GetUserNameFromIpPort(ipPort string) string {
+func (userCache *UserCache) GetUserNameFromIpPort(ipPort string) string {
 	var userName string
 	for k, v := range userCache.userLoginAddress {
 		if v == ipPort {

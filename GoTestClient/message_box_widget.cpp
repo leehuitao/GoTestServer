@@ -57,13 +57,17 @@ void MessageBoxWidget::contextMenuEvent(QContextMenuEvent *event)
 void MessageBoxWidget::openFilePath(int status)
 {
     if(m_isSelfMsg){
-        QString path =QCoreApplication::applicationDirPath();
+        QString path = QCoreApplication::applicationDirPath().replace("/","\\");
         QString filename = ui->label_4->text().split(":").last();
-        QDesktopServices::openUrl(QUrl(path, QUrl::TolerantMode));
+        QProcess proc(this);
+        proc.start("explorer /select," + path+"\\"+filename);
+        proc.waitForFinished();
     }else{
-        QString path = QCoreApplication::applicationDirPath();
+        QString path = QCoreApplication::applicationDirPath().replace("/","\\");
         QString filename = ui->label_2->text().split(":").last();
-        QDesktopServices::openUrl(QUrl(path, QUrl::TolerantMode));
+        QProcess proc(this);
+        proc.start("explorer /select," + path+"\\"+filename);
+        proc.waitForFinished();
     }
 }
 

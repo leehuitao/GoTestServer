@@ -216,6 +216,6 @@ void MainWindow::slotRecvFileCompelte(QString filename, QString UserName)
     MsgBody body;
     body.UserName = UserName;
     body.Msg = "接收文件成功:"+filename;
-    MessageBoxWidget *w = new MessageBoxWidget(body,ui->scrollArea->width()-18);
+    MessageBoxWidget *w = new MessageBoxWidget(body,ui->scrollArea->width()-18,1);
     ui->verticalLayout->insertWidget(AppCache::Instance()->m_msgSize++,w);
 }

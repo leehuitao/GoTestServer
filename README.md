@@ -21,7 +21,7 @@ golang测试并发服务器
 
 ![输入图片说明](image/server_show.png)
 ![输入图片说明](image/client_show.png)
-
+![输入图片说明](image/file_msg.png)
 #### 使用说明
 1.    需要安装模块
     1.go  get  -u github.com/go-sql-driver/mysql，如果无法使用可以直接进入gopath 下的src目录  clone下来

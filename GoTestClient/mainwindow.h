@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include "Network/tcp_client.h"
+#include "emotion_widget.h"
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -55,6 +56,8 @@ private slots:
     void slotRecvFileCompelte(QString filename,QString type);
 
 
+    void on_emoji_btn_clicked();
+
 private:
     void init();
     void setBottom();
@@ -64,5 +67,6 @@ private:
     int             m_loginStatus = 0;
     QString         m_currentChoiseUser;
     QString         m_userName;
+    EmotionWidget * m_emojiWidget;
 };
 #endif // MAINWINDOW_H

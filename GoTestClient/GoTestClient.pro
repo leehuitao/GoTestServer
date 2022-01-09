@@ -20,6 +20,7 @@ SOURCES += \
     Network/packet_process.cpp \
     Network/tcp_client.cpp \
     app_cache.cpp \
+    emotion_widget.cpp \
     main.cpp \
     mainwindow.cpp \
     message_box_widget.cpp
@@ -30,10 +31,12 @@ HEADERS += \
     Network/packet_process.h \
     Network/tcp_client.h \
     app_cache.h \
+    emotion_widget.h \
     mainwindow.h \
     message_box_widget.h
 
 FORMS += \
+    emotion_widget.ui \
     mainwindow.ui \
     message_box_widget.ui
 
@@ -41,3 +44,6 @@ FORMS += \
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+RESOURCES += \
+    resource.qrc

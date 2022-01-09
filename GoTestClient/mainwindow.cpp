@@ -56,7 +56,8 @@ void MainWindow::on_sendmsg_btn_clicked()
     body.UserName   = AppCache::Instance()->m_userName;
     body.DstUser    = m_currentChoiseUser;
     body.DstUserID  = 123;
-    body.Msg        = ui->msg_send_edit->text();
+    body.Msg        = ui->msg_send_edit->toHtml();
+    qDebug()<<body.Msg;
     body.MsgType    = 0;
     signSendMsg(body,MsgMethod,0);
     MessageBoxWidget *w = new MessageBoxWidget(body,ui->scrollArea->width()-18);
@@ -193,6 +194,18 @@ void MainWindow::init(){
 
     m_tcpClient->moveToThread(t1);
     t1->start();
+
+    m_emojiWidget = new EmotionWidget;
+    m_emojiWidget->initEmotion();
+
+    connect(m_emojiWidget,&EmotionWidget::emojiClicked,[=](int number){
+
+        QTextCursor cursor = ui->msg_send_edit->textCursor();
+        QTextDocument *document = ui->msg_send_edit->document();
+        //cursor.movePosition(QTextCursor::End);
+        cursor.insertImage(QString(":/resource/emoji/%1.gif").arg(number+1));
+    });
+
 }
 
 void MainWindow::setBottom()
@@ -218,4 +231,16 @@ void MainWindow::slotRecvFileCompelte(QString filename, QString UserName)
     body.Msg = "接收文件成功:"+filename;
     MessageBoxWidget *w = new MessageBoxWidget(body,ui->scrollArea->width()-18,1);
     ui->verticalLayout->insertWidget(AppCache::Instance()->m_msgSize++,w);
+}
+
+void MainWindow::on_emoji_btn_clicked()
+{
+    if(!m_emojiWidget->isVisible()){
+        m_emojiWidget->move(ui->emoji_btn->x()+this->x()-(m_emojiWidget->width()*0.5),ui->emoji_btn->y()+this->y()-m_emojiWidget->height()+23);
+
+        m_emojiWidget->show();
+    }else{
+        m_emojiWidget->hide();
+    }
+
 }

@@ -31,7 +31,11 @@ signals:
 
     void signContinueSendFile(int,FileBody);
 
+    void signSendFileProgress(int totalsize,int currentsize);
+
     void signRecvFileProgress(int totalsize,int currentsize,int sendstatus);
+
+    void signRecvFileCompelte(QString filename ,QString type);
 public slots:
     void sendLogin(QString  ip,int port ,LoginBody body);
 
@@ -50,6 +54,9 @@ private slots:
     void receiveData();
 
     void sendFileData(int method ,FileBody body );
+
+    void continueRecv(FileBody);
+
 private:
     QTcpSocket *            m_socket = nullptr;
     QList<MsgBody>          m_MsgCache;
@@ -58,7 +65,11 @@ private:
     QString                 m_serverip;
     int                     m_serverport;
     LoginBody               m_loginBody;
-    FileThread              *m_fileThreadList;
+    FileThread              *m_fileThreadList=nullptr;
+    QFile   *               m_recvFile;
+    FileBody                m_FileBodyCache;
+    int                     m_totalSize=0;
+    int                     m_currentSize=0;
 };
 
 #endif // TCPCLIENT_H

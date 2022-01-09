@@ -37,6 +37,8 @@ private slots:
 
     void slotRecvFileProgress(int totalsize,int currentsize,int sendstatus);
 
+    void slotSendFileProgress(int totalsize,int currentsize);
+
     void slotRecvOnlineUserList(QString userList);
 
 
@@ -48,6 +50,7 @@ private slots:
 
     void on_listWidget_currentTextChanged(const QString &currentText);
 
+    void slotRecvFileCompelte(QString filename,QString type);
 private:
     void init();
     void setBottom();

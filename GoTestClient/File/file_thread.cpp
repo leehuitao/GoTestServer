@@ -16,6 +16,15 @@ void FileThread::setFileData(FileBody body)
     m_userName = body.UserName;
 }
 
+void FileThread::close()
+{
+    m_mutex.lock();
+    m_fileCurrentSize = 0;
+    m_method = SendFileSuccess;
+    m_mutex.unlock();
+    m_condition.notify_all();
+}
+
 void FileThread::run()
 {
     //启动发送文件第一个包
@@ -38,6 +47,7 @@ void FileThread::run()
             m_file->seek(m_fileCurrentSize);
             body.FileData = m_file->read(FileBufferSize);
             m_fileCurrentSize += body.FileData.size();
+            body.CurrentSize = m_fileCurrentSize;
             signSendFileData(ContinueSendFileData,body);
         }else if (m_fileCurrentSize == body.TotalSize) {
             qDebug()<<"send file ok";

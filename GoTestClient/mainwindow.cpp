@@ -108,8 +108,16 @@ void MainWindow::slotRecvMsg(MsgBody body)
     qDebug()<<__FUNCTION__<<body.Msg;
 }
 
-void MainWindow::slotRecvFileProgress(int totalsize, int currentsize, int sendstatus)
+void MainWindow::slotSendFileProgress(int totalsize, int currentsize)
 {
+    int progress = double(currentsize)/double(totalsize)*100;
+    ui->progressBar->setValue(progress);
+}
+
+void MainWindow::slotRecvFileProgress(int totalsize, int currentsize,int sendstatus)
+{
+    int progress = double(currentsize)/double(totalsize)*100;
+    ui->recv_progressBar->setValue(progress);
 
 }
 
@@ -176,6 +184,8 @@ void MainWindow::init(){
     connect(m_tcpClient ,&TcpClient::signRecvFileProgress,  this,&MainWindow::slotRecvFileProgress          ,Qt::QueuedConnection);
     connect(m_tcpClient ,&TcpClient::signOnlineUserList,    this,&MainWindow::slotRecvOnlineUserList        ,Qt::QueuedConnection);
     connect(m_tcpClient ,&TcpClient::signOnlineUserUpdate,  this,&MainWindow::slotOnlineUserUpdate          ,Qt::QueuedConnection);
+    connect(m_tcpClient ,&TcpClient::signSendFileProgress,  this,&MainWindow::slotSendFileProgress          ,Qt::QueuedConnection);
+    connect(m_tcpClient ,&TcpClient::signRecvFileCompelte,  this,&MainWindow::slotRecvFileCompelte          ,Qt::QueuedConnection);
 
     m_tcpClient->moveToThread(t1);
     t1->start();
@@ -195,4 +205,13 @@ void MainWindow::on_listWidget_currentTextChanged(const QString &currentText)
 {
     qDebug()<<__FUNCTION__<<currentText<<" clicked ";
     m_currentChoiseUser = currentText;
+}
+
+void MainWindow::slotRecvFileCompelte(QString filename, QString UserName)
+{
+    MsgBody body;
+    body.UserName = UserName;
+    body.Msg = "接收文件成功:"+filename;
+    MessageBoxWidget *w = new MessageBoxWidget(body,ui->scrollArea->width()-18);
+    ui->verticalLayout->insertWidget(AppCache::Instance()->m_msgSize++,w);
 }

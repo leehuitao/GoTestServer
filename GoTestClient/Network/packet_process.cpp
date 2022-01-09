@@ -78,6 +78,5 @@ FileBody PacketProcess::parseFileDataPack(QByteArray arr)
     fileBody.CurrentSize    = values.value("CurrentSize").toInt();
     fileBody.DstUserName    = values.value("DstUserName").toString();
     fileBody.SendStatus     = values.value("SendStatus").toInt();
-    fileBody.FileData       = (char*)values.value("FileData").toVariant().data();
     return fileBody;
 }

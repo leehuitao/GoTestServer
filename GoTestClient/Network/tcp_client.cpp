@@ -39,6 +39,15 @@ void TcpClient::sendMsg(MsgBody body, int method, int methodType)
 
 void TcpClient::sendFile(FileBody body, int method, int methodType)
 {
+    if(m_fileThreadList != nullptr){
+        disconnect(this,&TcpClient::signContinueSendFile,m_fileThreadList,&FileThread::slotContinue);
+        disconnect(m_fileThreadList,&FileThread::signSendFileData,this,&TcpClient::sendFileData);
+        m_fileThreadList->close();// 信号量阻塞退出
+        m_fileThreadList->quit();  //线程正常退出
+        m_fileThreadList->wait();
+        delete m_fileThreadList;
+        m_fileThreadList = nullptr;
+    }
     m_fileThreadList = new FileThread();
     m_fileThreadList->setFileData(body);
     connect(this,&TcpClient::signContinueSendFile,m_fileThreadList,&FileThread::slotContinue,Qt::QueuedConnection);
@@ -103,13 +112,63 @@ void TcpClient::receiveData()
             LoginBody body;
             body = m_packProcess.parseLoginPack(arr);
             signLoginStatus(body.LoginStatus,body.LoginStatus ? "登录成功":"登录失败");
-
         }else if(method == Logout){
             signLoginStatus(0," user logout");
         }else if(method == MsgMethod){
             MsgBody body;
             body = m_packProcess.parseMsgPack(arr);
             signRecvMsg(body);
+        }else if(method == StartSendFile){
+            qDebug()<<"StartSendFile";
+            FileBody body;
+            body = m_packProcess.parseFileDataPack(arr);
+            m_recvFile = new QFile(body.FileName);
+            bool status = m_recvFile->open(QFile::WriteOnly|QFile::Append|QFile::Truncate);
+            if(status){
+                qDebug()<<"file start recv "<<body.FileName;
+                m_FileBodyCache = body;
+                continueRecv(m_FileBodyCache);
+                m_totalSize = body.TotalSize;
+                signRecvFileProgress(m_totalSize,0,1);
+            }else{
+                qDebug()<<"file start recv error "<<body.FileName;
+            }
+        }else if(method == ContinueGetFile){
+            FileBody body;
+//            body = m_packProcess.parseFileDataPack(arr);
+            /*int fileNameBufferSize;
+            int fileMD5BufferSize;
+            int sendUserNameBufferSize;
+            //QString fileNameBuffer,fileMD5Buffer,sendUserNameBuffer;
+            char *cache = new char[4];
+            memcpy(cache,arr.data(),4);
+            fileNameBufferSize =  int(cache);
+            char *fileNameBuffer = new char[fileNameBufferSize];
+            memcpy(fileNameBuffer,arr.data()+4,fileNameBufferSize);
+
+            memcpy(cache,arr.data()+4+fileNameBufferSize,4);
+            fileMD5BufferSize =  int(cache);
+            char *fileMD5Buffer = new char[fileMD5BufferSize];
+            memcpy(fileMD5Buffer,arr.data()+8+fileNameBufferSize,fileMD5BufferSize);
+
+            memcpy(cache,arr.data()+8+fileNameBufferSize+fileMD5BufferSize,4);
+            sendUserNameBufferSize =  int(cache);
+            char *sendUserNameBuffer = new char[sendUserNameBufferSize];
+            memcpy(sendUserNameBuffer,arr.data()+12+fileNameBufferSize+fileMD5BufferSize,sendUserNameBufferSize);
+            //总包大小减去头大小减去前缀
+            int fileSize = size - HeaderSize - 12+fileNameBufferSize+fileMD5BufferSize+sendUserNameBufferSize;*/
+            continueRecv(m_FileBodyCache);
+            m_currentSize += arr.size();
+            m_recvFile->write(rbytes,arr.size());
+            qDebug()<<"ContinueGetFile file write size = "<<size-HeaderSize;
+            signRecvFileProgress(m_totalSize,m_currentSize,1);
+        }else if(method == SendFileSuccess){
+            m_recvFile->write(rbytes,arr.size());
+            m_currentSize = 0;
+            signRecvFileProgress(m_totalSize,m_totalSize,1);
+            m_recvFile->close();
+            signRecvFileCompelte(m_FileBodyCache.FileName,m_FileBodyCache.DstUserName);
+            qDebug()<<"SendFileSuccessfile write size = "<<size-HeaderSize;
         }else if(method == ContinueSendFileData){
             FileBody body;
             body = m_packProcess.parseFileDataPack(arr);
@@ -139,10 +198,23 @@ void TcpClient::sendFileData(int method, FileBody body)
         Pack pack(body,method,0,1);
         auto data = pack.toByte();
         m_socket->write(data);
+        signSendFileProgress(body.TotalSize,body.CurrentSize);
+    }else if(method == SendFileSuccess){
+        Pack pack(body,method,0);
+        auto data = pack.toByte();
+        m_socket->write(data);
+        signSendFileProgress(body.TotalSize,body.CurrentSize);
     }else {
         Pack pack(body,method,0);
         auto data = pack.toByte();
         m_socket->write(data);
     }
 
+}
+
+void TcpClient::continueRecv(FileBody body)
+{
+    Pack pack(body,ContinueGetFile,0);
+    auto data = pack.toByte();
+    m_socket->write(data);
 }

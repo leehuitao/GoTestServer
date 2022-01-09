@@ -129,6 +129,7 @@ func Register() {
 	MethodMap[PackManager.SendFileData] = SendFileData
 	MethodMap[PackManager.SendFileCancel] = SendFileCancel
 	MethodMap[PackManager.SendFileSuccess] = SendFileEnd
+	MethodMap[PackManager.ContinueSend2File] = SendFileContinue
 
 }
 

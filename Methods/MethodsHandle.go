@@ -139,7 +139,7 @@ func SendFileCancel(pack *PackManager.Pack, conn net.Conn) (requestPack *PackMan
 	return pack
 }
 
-// SendFileEnd 发送文件完成
+// SendFileEnd 发送文件完成开始发送到对方客户端
 func SendFileEnd(pack *PackManager.Pack, conn net.Conn) (requestPack *PackManager.Pack) {
 	fileBody := PackManager.FileBody{}
 	if err := json.Unmarshal(pack.Body, &fileBody); err != nil {
@@ -151,6 +151,29 @@ func SendFileEnd(pack *PackManager.Pack, conn net.Conn) (requestPack *PackManage
 	}
 	newChannelCache.FileStopChanMap[fileBody.FileMD5] <- true
 	newChannelCache.ClearChannelCache(fileBody.FileMD5)
+	sendFileChannel := make(chan bool)
+	sendQuitChannel := make(chan bool)
+	getConn := ClientManagerHandle.GetConn(fileBody.DstUserName)
+	if getConn.conn != nil {
+		pack.Header.Method = PackManager.StartSendFile
+		data := createSendBuffer(*pack)
+		getConn.conn.Write(data)
+		go Utils.AliveFileSend(sendFileChannel, sendQuitChannel, fileBody.FileName, fileBody.FileMD5, fileBody.UserName, getConn.conn)
+		newChannelCache.AddNewSendChannelCache(fileBody.FileMD5, sendFileChannel, sendQuitChannel)
+	}
+	return pack
+}
 
+// SendFileContinue 文件发送继续
+func SendFileContinue(pack *PackManager.Pack, conn net.Conn) (requestPack *PackManager.Pack) {
+	fileBody := PackManager.FileBody{}
+	if err := json.Unmarshal(pack.Body, &fileBody); err != nil {
+		return nil
+	}
+	status := userCache.GetUserLoginStatus(fileBody.UserName)
+	if status != UserCache.LoginStatus {
+		return nil
+	}
+	newChannelCache.SendFileChanMap[fileBody.FileMD5] <- true
 	return pack
 }

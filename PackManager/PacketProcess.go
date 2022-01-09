@@ -8,16 +8,16 @@ import (
 )
 
 const (
-	Login           = 100
-	Logout          = 101
-	Msg             = 102
-	StartSendFile   = 103
-	SendFileData    = 104
-	SendFileCancel  = 105
-	SendFileSuccess = 106
-
-	OnlineUserList   = 200
-	UpdateOnlineUser = 201
+	Login             = 100
+	Logout            = 101
+	Msg               = 102
+	StartSendFile     = 103
+	SendFileData      = 104
+	SendFileCancel    = 105
+	SendFileSuccess   = 106
+	ContinueSend2File = 107
+	OnlineUserList    = 200
+	UpdateOnlineUser  = 201
 )
 
 // Header -----------------一级协议包--------------------

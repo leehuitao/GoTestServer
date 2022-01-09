@@ -14,6 +14,8 @@ public:
     explicit FileThread(QObject *parent = nullptr);
 
     void setFileData(FileBody);
+
+    void close();
 protected:
     void run() override;
 signals:

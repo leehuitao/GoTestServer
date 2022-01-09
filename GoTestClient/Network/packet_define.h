@@ -18,9 +18,10 @@
 #define     ContinueSendFileData        104
 #define     SendFileCancel              105
 #define     SendFileSuccess             106
+#define     ContinueGetFile             107
 #define     OnlineUserList              200
 #define     UpdateOnlineUser            201
-#define HeaderSize 12
+#define     HeaderSize 12
 
 #define     UserLogoffStatus    0
 #define     UserLoginStatus     1

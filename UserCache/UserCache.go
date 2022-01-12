@@ -2,6 +2,7 @@ package UserCache
 
 import (
 	"errors"
+	"testserver/DBIO/MysqlManager"
 	"testserver/PackManager"
 )
 
@@ -24,13 +25,15 @@ func NewUserCache() (cache *UserCache) {
 		make(map[string]int),
 		make(map[string]string),
 	}
-	body := PackManager.LoginBody{}
-	body.UserName = "test"
-	body.PassWord = "test"
-	cache.userCacheMap["test"] = body
-	body.UserName = "test1"
-	body.PassWord = "test1"
-	cache.userCacheMap["test1"] = body
+	m := MysqlManager.Select("select * from userinfo")
+	for k, v := range m {
+		body := PackManager.LoginBody{}
+		body.UserName = v.UserName
+		body.PassWord = v.PassWord
+		body.MacAddress = v.MacAddress
+		body.UserLoginName = v.UserLoginName
+		cache.userCacheMap[k] = body
+	}
 	return cache
 
 }
@@ -52,11 +55,21 @@ func (userCache *UserCache) GetUserLoginAddressMap() map[string]string {
 	return userCache.userLoginAddress
 }
 
-func (userCache *UserCache) GetUserPassword(userName string) (string, error) {
-	body, exist := userCache.userCacheMap[userName]
+func (userCache *UserCache) GetUserPassword(userLoginName string) (string, error) {
+	body, exist := userCache.userCacheMap[userLoginName]
 
 	if exist {
 		return body.PassWord, nil
+	}
+
+	return "", errors.New("user does not exist")
+}
+
+func (userCache *UserCache) GetUserName(userLoginName string) (string, error) {
+	body, exist := userCache.userCacheMap[userLoginName]
+
+	if exist {
+		return body.UserName, nil
 	}
 
 	return "", errors.New("user does not exist")
@@ -94,12 +107,12 @@ func (userCache *UserCache) DelUserCacheForIpPort(ip string) {
 	delete(userCache.userLoginAddress, userName)
 }
 
-func (userCache *UserCache) UpdateUserLoginStatus(userName string, status int) {
-	userCache.userLoginStatus[userName] = status
+func (userCache *UserCache) UpdateUserLoginStatus(userLoginName string, status int) {
+	userCache.userLoginStatus[userLoginName] = status
 }
 
-func (userCache *UserCache) GetUserLoginStatus(userName string) int {
-	status, exist := userCache.userLoginStatus[userName]
+func (userCache *UserCache) GetUserLoginStatus(userLoginName string) int {
+	status, exist := userCache.userLoginStatus[userLoginName]
 
 	if exist {
 		return status

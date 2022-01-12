@@ -36,9 +36,12 @@ type ClientManager struct {
 }
 
 var ClientManagerHandle ClientManager
+var newChannelCache *Utils.ChannelCache //= Utils.NewChannelCache()
+var userCache *UserCache.UserCache      //= UserCache.NewUserCache()
 
 func ClientInit() {
 	ClientManagerHandle.clientMap = make(map[string]TcpClient)
+
 }
 func (clientManager *ClientManager) AddConn(tcpClient TcpClient) {
 	ClientManagerHandle.clientMap[tcpClient.conn.RemoteAddr().String()] = tcpClient
@@ -125,6 +128,8 @@ var MethodMap map[int]func(pack *PackManager.Pack, conn net.Conn) (request *Pack
 
 func Init() {
 	MethodMap = make(map[int]func(pack *PackManager.Pack, conn net.Conn) (request *PackManager.Pack))
+	newChannelCache = Utils.NewChannelCache()
+	userCache = UserCache.NewUserCache()
 	Register()
 }
 
@@ -145,9 +150,6 @@ func MethodPerform(pack *PackManager.Pack, conn net.Conn) (request *PackManager.
 	return MethodMap[pack.Header.Method](pack, conn)
 }
 
-var newChannelCache = Utils.NewChannelCache()
-var userCache = UserCache.NewUserCache()
-
 func intToBytes(n int) []byte {
 	x := int32(n)
 	bytesBuffer := bytes.NewBuffer([]byte{})
@@ -164,11 +166,11 @@ func createSendBuffer(pack PackManager.Pack) []byte {
 	return buffer.Bytes()
 }
 
-func NoticeAllOnlineUserChangeStatus(UserName string, status int) {
+func NoticeAllOnlineUserChangeStatus(UserLoginName string, status int) {
 
 	pack := PackManager.Pack{}
 	onlineListBody := PackManager.OnlineListBody{}
-	onlineListBody.UserName = UserName
+	onlineListBody.UserLoginName = UserLoginName
 	onlineListBody.Status = status
 	b, _ := json.Marshal(onlineListBody)
 	pack.Body = b

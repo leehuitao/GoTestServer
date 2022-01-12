@@ -19,6 +19,8 @@ public:
 signals:
     void signLoginStatus(int status,QString str = "");
 
+    void signLoginBody(LoginBody);
+
     void signOnlineUserList(QString userList);
 
     void signOnlineUserUpdate(OnlineListBody body);

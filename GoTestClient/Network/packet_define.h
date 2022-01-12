@@ -43,6 +43,7 @@ static QString createUuid(){
 
 struct MsgBody  {
     QString     UserName;
+    QString     UserLoginName;
     QString     DstUser;
     int         DstUserID;
     int         MsgType;
@@ -51,6 +52,7 @@ struct MsgBody  {
 
 struct FileBody  {
     QString         UserName      ;
+    QString         UserLoginName ;
     QString         FileName      ;
     QString         FileMD5       ;
     int             TotalSize     ;
@@ -63,6 +65,7 @@ struct FileBody  {
 // LoginBody
 struct LoginBody  {
     QString     UserName   ;
+    QString     UserLoginName;
     QString     PassWord   ;
     bool        Notice     ;
     QString     MacAddress ;
@@ -71,7 +74,7 @@ struct LoginBody  {
 };
 
 struct OnlineListBody  {
-    QString     UserName;
+    QString     UserLoginName;
     int         Status;
 };
 
@@ -95,6 +98,7 @@ struct Pack  {
     Pack(MsgBody body, int method ,int methodType){
         QJsonObject json;//构建json对象json
         json.insert("UserName", body.UserName);
+        json.insert("UserLoginName", body.UserLoginName);
         json.insert("DstUser", body.DstUser);
         json.insert("DstUserID", body.DstUserID);
         json.insert("MsgType", body.MsgType);
@@ -111,6 +115,7 @@ struct Pack  {
         if( isData == 0){
             QJsonObject json;//构建json对象json
             json.insert("UserName", body.UserName);
+            json.insert("UserLoginName", body.UserLoginName);
             json.insert("FileName", body.FileName);
             json.insert("FileMD5", body.FileMD5);
             json.insert("TotalSize", body.TotalSize);
@@ -127,7 +132,7 @@ struct Pack  {
             Header.PackSize =HeaderSize +   Body.size();
         }else{
             QDataStream packet(&Body,QIODevice::WriteOnly);
-            QByteArray name(body.UserName.toUtf8().data());
+            QByteArray name(body.UserLoginName.toUtf8().data());
             QByteArray md5(body.FileMD5.toUtf8().data());
             packet<<name.size();
             packet<<md5.size();
@@ -143,6 +148,7 @@ struct Pack  {
 
         QJsonObject json;//构建json对象json
         json.insert("UserName", body.UserName);
+        json.insert("UserLoginName", body.UserLoginName);
         json.insert("PassWord", body.PassWord);
         json.insert("Notice", body.Notice);
         json.insert("MacAddress", body.MacAddress);

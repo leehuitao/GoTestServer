@@ -45,7 +45,7 @@ void EmotionWidget::initEmotion()
     this->setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
     ui->tableWidget->setFocusPolicy(Qt::NoFocus);
 
-    QString path = "F:/yiheng/GoTestServer/GoTestClient/resource/emoji/%1.gif";
+    QString path = ":/resource/emoji/%1.gif";
     for (int i = 0; i < 16; i++)
     {
         addEmotionItem(path.arg(i + 1));

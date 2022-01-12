@@ -14,6 +14,7 @@ void FileThread::setFileData(FileBody body)
     m_fileMd5 = body.FileMD5;
     m_dstUser = body.DstUserName;
     m_userName = body.UserName;
+    m_userLoginName = body.UserLoginName;
 }
 
 void FileThread::close()
@@ -32,6 +33,7 @@ void FileThread::run()
     m_file->open(QFile::ReadOnly);
     FileBody body;
     body.UserName = m_userName;
+    body.UserLoginName = m_userLoginName;
     body.FileName = m_filePath.split("/").last();
     body.DstUserName = m_dstUser;
     body.FileMD5 = m_fileMd5;

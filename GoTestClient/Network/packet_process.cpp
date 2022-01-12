@@ -16,6 +16,7 @@ LoginBody PacketProcess::parseLoginPack(QByteArray arr)
     }
     auto values = jsonDoc.object();
     LoginBody loginBody;
+    loginBody.UserLoginName = values.value("UserLoginName").toString();
     loginBody.UserName = values.value("UserName").toString();
     loginBody.PassWord = values.value("PassWord").toString();
     loginBody.Notice = values.value("Notice").toBool();
@@ -37,6 +38,7 @@ MsgBody PacketProcess::parseMsgPack(QByteArray arr)
     auto values = jsonDoc.object();
     MsgBody  msgBody;
     msgBody.UserName    = values.value("UserName").toString();
+    msgBody.UserLoginName    = values.value("UserLoginName").toString();
     msgBody.Msg         = values.value("Msg").toString();
     msgBody.MsgType     = values.value("MsgType").toInt();
     msgBody.DstUser     = values.value("DstUser").toString();
@@ -55,7 +57,7 @@ OnlineListBody PacketProcess::parseOnlineListBodyPack(QByteArray arr)
     }
     auto values = jsonDoc.object();
     OnlineListBody  onlineListBody;
-    onlineListBody.UserName     = values.value("UserName").toString();
+    onlineListBody.UserLoginName     = values.value("UserLoginName").toString();
     onlineListBody.Status       = values.value("Status").toInt();
     return onlineListBody;
 }
@@ -72,6 +74,7 @@ FileBody PacketProcess::parseFileDataPack(QByteArray arr)
     auto values = jsonDoc.object();
     FileBody  fileBody;
     fileBody.UserName       = values.value("UserName").toString();
+    fileBody.UserLoginName       = values.value("UserLoginName").toString();
     fileBody.FileName       = values.value("FileName").toString();
     fileBody.FileMD5        = values.value("FileMD5").toString();
     fileBody.TotalSize      = values.value("TotalSize").toInt();

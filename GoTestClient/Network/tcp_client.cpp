@@ -112,6 +112,7 @@ void TcpClient::receiveData()
             LoginBody body;
             body = m_packProcess.parseLoginPack(arr);
             signLoginStatus(body.LoginStatus,body.LoginStatus ? "登录成功":"登录失败");
+            signLoginBody(body);
         }else if(method == Logout){
             signLoginStatus(0," user logout");
         }else if(method == MsgMethod){

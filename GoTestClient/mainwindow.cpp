@@ -17,6 +17,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->scrollArea->verticalScrollBar(),&QScrollBar::rangeChanged,[=](int min,int max){
         ui->scrollArea->verticalScrollBar()->setValue(max);
     });
+    initDB();
 }
 
 MainWindow::~MainWindow()
@@ -36,7 +37,7 @@ void MainWindow::on_login_btn_clicked()
         QString ip = ui->ip->text();
         int port   = ui->port->text().toInt();
         LoginBody body;
-        body.UserName   = AppCache::Instance()->m_userName;
+        body.UserLoginName   = AppCache::Instance()->m_userName;
         body.PassWord   = AppCache::Instance()->m_userName;
         body.LoginTime  = getCurrentTimeSeconds();
         body.MacAddress = getHostMacAddress();
@@ -44,6 +45,7 @@ void MainWindow::on_login_btn_clicked()
         signLogin(ip,port,body);
     }else{
         LoginBody body;
+        body.UserLoginName   = AppCache::Instance()->m_userName;
         body.UserName   = AppCache::Instance()->m_userName;
         signLogout(body);
     }
@@ -53,6 +55,7 @@ void MainWindow::on_login_btn_clicked()
 void MainWindow::on_sendmsg_btn_clicked()
 {
     MsgBody body;
+    body.UserLoginName   = AppCache::Instance()->m_userName;
     body.UserName   = AppCache::Instance()->m_userName;
     body.DstUser    = m_currentChoiseUser;
     body.DstUserID  = 123;
@@ -86,6 +89,7 @@ void MainWindow::on_file_send_btn_clicked()
 {
     QString path = ui->file_send_edit->text();
     FileBody body;
+    body.UserLoginName   = AppCache::Instance()->m_userName;
     body.UserName = AppCache::Instance()->m_userName;
     body.FileName = path;
     body.DstUserName = m_currentChoiseUser;
@@ -141,9 +145,9 @@ void MainWindow::slotRecvOnlineUserList(QString userList)
 void MainWindow::slotOnlineUserUpdate(OnlineListBody body)
 {
     if(body.Status == UserLoginStatus){
-        ui->listWidget->addItem(body.UserName);
+        ui->listWidget->addItem(body.UserLoginName);
     }else if(body.Status == UserLogoffStatus){
-        auto item = ui->listWidget->findItems(body.UserName,Qt::MatchExactly);
+        auto item = ui->listWidget->findItems(body.UserLoginName,Qt::MatchExactly);
         if(item.size() == 1){
             ui->listWidget->removeItemWidget(item.at(0));
             delete item.at(0);
@@ -185,6 +189,7 @@ void MainWindow::init(){
     connect(this,&MainWindow::signSendFile,             m_tcpClient,&TcpClient::sendFile                  ,Qt::QueuedConnection);
 
     connect(m_tcpClient ,&TcpClient::signLoginStatus,       this,&MainWindow::slotLoginStatus               ,Qt::QueuedConnection);
+    connect(m_tcpClient ,&TcpClient::signLoginBody,         this,&MainWindow::slotLoginBody                 ,Qt::QueuedConnection);
     connect(m_tcpClient ,&TcpClient::signRecvMsg,           this,&MainWindow::slotRecvMsg                   ,Qt::QueuedConnection);
     connect(m_tcpClient ,&TcpClient::signRecvFileProgress,  this,&MainWindow::slotRecvFileProgress          ,Qt::QueuedConnection);
     connect(m_tcpClient ,&TcpClient::signOnlineUserList,    this,&MainWindow::slotRecvOnlineUserList        ,Qt::QueuedConnection);
@@ -218,19 +223,36 @@ void MainWindow::setBottom()
     }
 }
 
+void MainWindow::initDB()
+{
+//    QSqlDatabase db;
+//    db = QSqlDatabase::addDatabase("QSQLITE", "MTPSQLLITE3");
+//    db.setDatabaseName("user.db");
+//    db.open();
+//    QSqlQuery query(db);
+//    QString str = "create table usercache (id int ,name varchar(50))";
+//    query.exec(str);
+
+}
+
 void MainWindow::on_listWidget_currentTextChanged(const QString &currentText)
 {
     qDebug()<<__FUNCTION__<<currentText<<" clicked ";
     m_currentChoiseUser = currentText;
 }
 
-void MainWindow::slotRecvFileCompelte(QString filename, QString UserName)
+void MainWindow::slotRecvFileCompelte(QString filename, QString UserLoginName)
 {
     MsgBody body;
-    body.UserName = UserName;
+    body.UserLoginName = UserLoginName;
     body.Msg = "接收文件成功:"+filename;
     MessageBoxWidget *w = new MessageBoxWidget(body,ui->scrollArea->width()-18,1);
     ui->verticalLayout->insertWidget(AppCache::Instance()->m_msgSize++,w);
+}
+
+void MainWindow::slotLoginBody(LoginBody body)
+{
+    ui->username_lab->setText(body.UserName);
 }
 
 void MainWindow::on_emoji_btn_clicked()

@@ -15,7 +15,7 @@ func SendLogin(pack *PackManager.Pack, conn net.Conn) (requestPack *PackManager.
 	if err := json.Unmarshal(pack.Body, &loginBody); err != nil {
 		return nil
 	}
-	password, err := userCache.GetUserPassword(loginBody.UserName)
+	password, err := userCache.GetUserPassword(loginBody.UserLoginName)
 
 	resPack := PackManager.Pack{}
 	resPack.Header.Method = pack.Header.Method
@@ -26,9 +26,14 @@ func SendLogin(pack *PackManager.Pack, conn net.Conn) (requestPack *PackManager.
 	}
 	if loginBody.PassWord == password {
 		loginBody.LoginStatus = 1
-		NoticeAllOnlineUserChangeStatus(loginBody.UserName, UserCache.LoginStatus)
-		userCache.UpdateUserLoginStatus(loginBody.UserName, UserCache.LoginStatus)
-		userCache.AddUserCache(loginBody.UserName, loginBody, conn.RemoteAddr().String())
+		userName, err := userCache.GetUserName(loginBody.UserLoginName)
+		if err != nil {
+			return nil
+		}
+		loginBody.UserName = userName
+		NoticeAllOnlineUserChangeStatus(loginBody.UserLoginName, UserCache.LoginStatus)
+		userCache.UpdateUserLoginStatus(loginBody.UserLoginName, UserCache.LoginStatus)
+		userCache.AddUserCache(loginBody.UserLoginName, loginBody, conn.RemoteAddr().String())
 	} else {
 		loginBody.LoginStatus = 0
 	}
@@ -36,7 +41,7 @@ func SendLogin(pack *PackManager.Pack, conn net.Conn) (requestPack *PackManager.
 	resPack.Body = b
 	data := createSendBuffer(resPack)
 	conn.Write(data)
-	SendOnlineUserList(loginBody.UserName, conn)
+	SendOnlineUserList(loginBody.UserLoginName, conn)
 	return pack
 }
 
@@ -46,18 +51,18 @@ func SendLogout(pack *PackManager.Pack, conn net.Conn) (requestPack *PackManager
 	if err := json.Unmarshal(pack.Body, &loginBody); err != nil {
 		return nil
 	}
-	status := userCache.GetUserLoginStatus(loginBody.UserName)
+	status := userCache.GetUserLoginStatus(loginBody.UserLoginName)
 	if status != UserCache.LoginStatus {
 		return nil
 	}
-	userCache.DelUserCache(loginBody.UserName)
+	userCache.DelUserCache(loginBody.UserLoginName)
 	resPack := PackManager.Pack{}
 	resPack.Header.Method = pack.Header.Method
 	resPack.Header.MethodType = 0
 	resPack.Body = []byte{}
 	data := createSendBuffer(resPack)
 	conn.Write(data)
-	NoticeAllOnlineUserChangeStatus(loginBody.UserName, UserCache.LogoffStatus)
+	NoticeAllOnlineUserChangeStatus(loginBody.UserLoginName, UserCache.LogoffStatus)
 	return pack
 }
 

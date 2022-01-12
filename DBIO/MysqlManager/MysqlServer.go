@@ -40,18 +40,28 @@ func Insert(sql string) {
 }
 
 type UserData struct {
+	id            int    `db:"id"`
+	UserName      string `db:"UserName"`
+	UserLoginName string `db:"UserLoginName"`
+	PassWord      string `db:"PassWord"`
+	Notice        int    `db:"Notice"`
+	MacAddress    string `db:"MacAddress"`
+	LoginTime     string `db:"LoginTime"`
 }
 
 // Select 查询
-func Select(sql string) {
+func Select(sql string) map[string]UserData {
 	rows, _ := dbPool.Query(sql)
+	user := make(map[string]UserData)
 	for rows.Next() { // 测试写一下
 
-		UserData := UserData{}
-		err := rows.Scan(UserData)
+		userData := UserData{}
+		err := rows.Scan(&userData.id, &userData.UserName, &userData.UserLoginName, &userData.PassWord, &userData.Notice, &userData.MacAddress, &userData.LoginTime)
+		user[userData.UserLoginName] = userData
 		checkErr(err)
 	}
 	rows.Close() //释放连接
+	return user
 }
 
 func queryInsert() {

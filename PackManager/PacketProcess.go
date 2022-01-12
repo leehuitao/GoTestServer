@@ -43,31 +43,34 @@ type Pack struct {
 // MsgBody -----------------二级协议包--------------------
 // MsgBody 普通消息的json类型
 type MsgBody struct {
-	UserName  string `json:"UserName"`
-	DstUser   string `json:"DstUser"`
-	DstUserID int    `json:"DstUserID"`
-	MsgType   int    `json:"MsgType"`
-	Msg       string `json:"Msg"`
+	UserName      string `json:"UserName"`
+	UserLoginName string `json:"UserLoginName"`
+	DstUser       string `json:"DstUser"`
+	DstUserID     int    `json:"DstUserID"`
+	MsgType       int    `json:"MsgType"`
+	Msg           string `json:"Msg"`
 }
 type FileBody struct {
-	UserName    string `json:"UserName"`
-	FileName    string `json:"FileName"`
-	FileMD5     string `json:"FileMD5"`
-	TotalSize   int    `json:"TotalSize"`
-	CurrentSize int    `json:"CurrentSize"`
-	DstUserName string `json:"DstUserName"`
-	SendStatus  int    `json:"SendStatus"`
-	FileData    []byte `json:"FileData"`
+	UserName      string `json:"UserName"`
+	UserLoginName string `json:"UserLoginName"`
+	FileName      string `json:"FileName"`
+	FileMD5       string `json:"FileMD5"`
+	TotalSize     int    `json:"TotalSize"`
+	CurrentSize   int    `json:"CurrentSize"`
+	DstUserName   string `json:"DstUserName"`
+	SendStatus    int    `json:"SendStatus"`
+	FileData      []byte `json:"FileData"`
 }
 
 // LoginBody  登录包json
 type LoginBody struct {
-	UserName    string `json:"UserName"`
-	PassWord    string `json:"PassWord"`
-	Notice      bool   `json:"Notice"`
-	MacAddress  string `json:"MacAddress"`
-	LoginTime   string `json:"LoginTime"`
-	LoginStatus int    `json:"LoginStatus"`
+	UserName      string `json:"UserName"`
+	UserLoginName string `json:"UserLoginName"`
+	PassWord      string `json:"PassWord"`
+	Notice        bool   `json:"Notice"`
+	MacAddress    string `json:"MacAddress"`
+	LoginTime     string `json:"LoginTime"`
+	LoginStatus   int    `json:"LoginStatus"`
 }
 
 // SystemBody  系统指令json
@@ -86,8 +89,8 @@ type GroupBody struct {
 
 // OnlineListBody  用户状态更新json
 type OnlineListBody struct {
-	UserName string `json:"UserName"`
-	Status   int    `json:"Status"`
+	UserLoginName string `json:"UserLoginName"`
+	Status        int    `json:"Status"`
 }
 
 // IntToBytes 整形转换成字节

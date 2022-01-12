@@ -4,6 +4,10 @@
 #include <QMainWindow>
 #include "Network/tcp_client.h"
 #include "emotion_widget.h"
+#include <QSqlDatabase>
+#include <QSqlQuery>
+#include <QSqlError>
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -55,12 +59,15 @@ private slots:
 
     void slotRecvFileCompelte(QString filename,QString type);
 
+    void slotLoginBody(LoginBody);
 
     void on_emoji_btn_clicked();
 
 private:
     void init();
     void setBottom();
+
+    void initDB();
 private:
     Ui::MainWindow *ui;
     TcpClient   *   m_tcpClient;

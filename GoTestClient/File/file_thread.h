@@ -34,6 +34,7 @@ private:
     QFile *             m_file;
     QString             m_dstUser;
     QString             m_userName;
+    QString             m_userLoginName;
 };
 
 #endif // FILETHREAD_H

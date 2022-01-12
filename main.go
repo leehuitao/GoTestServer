@@ -13,7 +13,7 @@ func main() {
 
 	LogService.LogDebug("日志服务启动")
 	//Mysql连接池启动
-	MysqlManager.StartMysqlService("", "", "", "", "")
+	MysqlManager.StartMysqlService("127.0.0.1", "3306", "root", "qazWSX123.", "gotestdb")
 	//方法注册
 	Methods.Init()
 	//客户端数据初始化

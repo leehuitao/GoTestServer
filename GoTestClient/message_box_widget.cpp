@@ -14,7 +14,7 @@ MessageBoxWidget::MessageBoxWidget(MsgBody body, int w, int msgType, QWidget *pa
 {
     ui->setupUi(this);
     this->setMaximumWidth(w);
-    m_isSelfMsg = (body.UserName == AppCache::Instance()->m_userName);
+    m_isSelfMsg = (body.UserLoginName == AppCache::Instance()->m_userName);
     create(body);
 }
 
@@ -76,14 +76,14 @@ void MessageBoxWidget::create(MsgBody body)
     if(m_isSelfMsg){
         ui->other->hide();
         ui->label_4->setText(body.Msg);
-        ui->label_3->setPixmap(QPixmap("F:/yiheng/GoTestServer/GoTestClient/resource/self.png"));
+        ui->label_3->setPixmap(QPixmap("D:/LHT/GoTestServer/GoTestClient/resource/self.png"));
         int h = ui->label_4->height();
         //this->setMaximumHeight(h+18);
 
     }else{
         ui->self->hide();
         ui->label_2->setText(body.Msg);
-        ui->label_1->setPixmap(QPixmap("F:/yiheng/GoTestServer/GoTestClient/resource/other.png"));
+        ui->label_1->setPixmap(QPixmap("D:/LHT/GoTestServer/GoTestClient/resource/other.png"));
         int h = ui->label_2->height();
         //this->setMaximumHeight(h+18);
     }

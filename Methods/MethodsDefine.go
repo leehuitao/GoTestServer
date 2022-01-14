@@ -143,6 +143,8 @@ func Register() {
 	MethodMap[PackManager.SendFileCancel] = SendFileCancel
 	MethodMap[PackManager.SendFileSuccess] = SendFileEnd
 	MethodMap[PackManager.ContinueSend2File] = SendFileContinue
+	MethodMap[PackManager.GetOrg] = GetDeptOrg
+	MethodMap[PackManager.GetOnlineUser] = GetOnlineUsers
 
 }
 

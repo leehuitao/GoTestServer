@@ -47,21 +47,42 @@ type UserData struct {
 	Notice        int    `db:"Notice"`
 	MacAddress    string `db:"MacAddress"`
 	LoginTime     string `db:"LoginTime"`
+	ParentDeptID  int    `db:"ParentDeptID"`
 }
 
-// Select 查询
-func Select(sql string) map[string]UserData {
+type DeptData struct {
+	DeptName     string `db:"DeptName"`
+	DeptID       int    `db:"DeptID"`
+	ParentDeptID int    `db:"ParentDeptID"`
+	Level        int    `db:"Level"`
+}
+
+// SelectUserCache 查询
+func SelectUserCache(sql string) map[string]UserData {
 	rows, _ := dbPool.Query(sql)
 	user := make(map[string]UserData)
-	for rows.Next() { // 测试写一下
-
+	for rows.Next() {
 		userData := UserData{}
-		err := rows.Scan(&userData.id, &userData.UserName, &userData.UserLoginName, &userData.PassWord, &userData.Notice, &userData.MacAddress, &userData.LoginTime)
+		err := rows.Scan(&userData.id, &userData.UserName, &userData.UserLoginName, &userData.PassWord, &userData.Notice, &userData.MacAddress, &userData.LoginTime, &userData.ParentDeptID)
 		user[userData.UserLoginName] = userData
 		checkErr(err)
 	}
 	rows.Close() //释放连接
 	return user
+}
+
+// SelectOrg 查询
+func SelectOrg(sql string) map[int]DeptData {
+	rows, _ := dbPool.Query(sql)
+	depts := make(map[int]DeptData)
+	for rows.Next() {
+		dept := DeptData{}
+		err := rows.Scan(&dept.DeptName, &dept.DeptID, &dept.ParentDeptID, &dept.Level)
+		depts[dept.DeptID] = dept
+		checkErr(err)
+	}
+	rows.Close() //释放连接
+	return depts
 }
 
 func queryInsert() {

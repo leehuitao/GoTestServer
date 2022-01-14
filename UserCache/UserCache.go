@@ -1,6 +1,7 @@
 package UserCache
 
 import (
+	"encoding/json"
 	"errors"
 	"testserver/DBIO/MysqlManager"
 	"testserver/PackManager"
@@ -13,10 +14,45 @@ type UserCache struct {
 	userLoginAddress map[string]string
 }
 
+type OrgCacheItem struct {
+	DeptName     string `json:"DeptName"`
+	DeptID       int    `json:"DeptID"`
+	ParentDeptID int    `json:"ParentDeptID"`
+	Level        int    `json:"Level"`
+}
+type OrgCache struct {
+	dept     []OrgCacheItem
+	deptJson map[int]interface{}
+}
+
 const (
 	LogoffStatus = 0
 	LoginStatus  = 1
 )
+
+var OrgCacheData OrgCache
+
+func (org *OrgCache) addCache(data OrgCacheItem) {
+	org.dept = append(org.dept, data)
+	b, _ := json.Marshal(data)
+	org.deptJson[data.DeptID] = b
+}
+
+func (org *OrgCache) GetJson() []byte {
+	marshal, err := json.Marshal(org.deptJson)
+	if err != nil {
+		return nil
+	}
+	return marshal
+}
+
+func NewOrgCache() (cache OrgCache) {
+	orgCache := OrgCache{}
+
+	orgCache.deptJson = make(map[int]interface{})
+
+	return orgCache
+}
 
 func NewUserCache() (cache *UserCache) {
 	cache = &UserCache{
@@ -25,7 +61,13 @@ func NewUserCache() (cache *UserCache) {
 		make(map[string]int),
 		make(map[string]string),
 	}
-	m := MysqlManager.Select("select * from userinfo")
+	mysqlInit(cache)
+	orgInit()
+	return cache
+}
+
+func mysqlInit(cache *UserCache) {
+	m := MysqlManager.SelectUserCache("select * from userinfo")
 	for k, v := range m {
 		body := PackManager.LoginBody{}
 		body.UserName = v.UserName
@@ -34,9 +76,21 @@ func NewUserCache() (cache *UserCache) {
 		body.UserLoginName = v.UserLoginName
 		cache.userCacheMap[k] = body
 	}
-	return cache
-
 }
+
+func orgInit() {
+	OrgCacheData = NewOrgCache()
+	org := MysqlManager.SelectOrg("select * from dept_info")
+	for _, v := range org {
+		item := OrgCacheItem{}
+		item.DeptName = v.DeptName
+		item.DeptID = v.DeptID
+		item.ParentDeptID = v.ParentDeptID
+		item.Level = v.Level
+		OrgCacheData.addCache(item)
+	}
+}
+
 func (userCache *UserCache) GetOnlineUsers() string {
 	keys := ""
 	for k, v := range userCache.userLoginStatus {

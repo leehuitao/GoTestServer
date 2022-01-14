@@ -18,6 +18,8 @@ const (
 	ContinueSend2File = 107
 	OnlineUserList    = 200
 	UpdateOnlineUser  = 201
+	GetOrg            = 300
+	GetOnlineUser     = 301
 )
 
 // Header -----------------一级协议包--------------------
@@ -75,16 +77,16 @@ type LoginBody struct {
 
 // SystemBody  系统指令json
 type SystemBody struct {
-	UserName  string `json:"UserName"`
-	SystemCMD string `json:"SystemCMD"`
+	UserLoginName string `json:"UserLoginName"`
+	SystemCMD     string `json:"SystemCMD"`
 }
 
 // GroupBody  群组指令json
 type GroupBody struct {
-	UserName   string `json:"UserName"`
-	DstGroupId string `json:"DstGroupId"`
-	Type       string `json:"Type"`
-	Msg        string `json:"Msg"`
+	UserLoginName string `json:"UserLoginName"`
+	DstGroupId    string `json:"DstGroupId"`
+	Type          string `json:"Type"`
+	Msg           string `json:"Msg"`
 }
 
 // OnlineListBody  用户状态更新json

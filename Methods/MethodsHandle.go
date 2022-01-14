@@ -41,7 +41,6 @@ func SendLogin(pack *PackManager.Pack, conn net.Conn) (requestPack *PackManager.
 	resPack.Body = b
 	data := createSendBuffer(resPack)
 	conn.Write(data)
-	SendOnlineUserList(loginBody.UserLoginName, conn)
 	return pack
 }
 
@@ -63,6 +62,39 @@ func SendLogout(pack *PackManager.Pack, conn net.Conn) (requestPack *PackManager
 	data := createSendBuffer(resPack)
 	conn.Write(data)
 	NoticeAllOnlineUserChangeStatus(loginBody.UserLoginName, UserCache.LogoffStatus)
+	return pack
+}
+
+// GetDeptOrg 发送组织架构
+func GetDeptOrg(pack *PackManager.Pack, conn net.Conn) (requestPack *PackManager.Pack) {
+	sysBody := PackManager.SystemBody{}
+	if err := json.Unmarshal(pack.Body, &sysBody); err != nil {
+		return nil
+	}
+	status := userCache.GetUserLoginStatus(sysBody.UserLoginName)
+	if status != UserCache.LoginStatus {
+		return nil
+	}
+
+	pack.Body = UserCache.OrgCacheData.GetJson()
+	data := createSendBuffer(*pack)
+	conn.Write(data)
+	return pack
+}
+
+// GetOnlineUsers 发送在线人员列表
+func GetOnlineUsers(pack *PackManager.Pack, conn net.Conn) (requestPack *PackManager.Pack) {
+	sysBody := PackManager.SystemBody{}
+	if err := json.Unmarshal(pack.Body, &sysBody); err != nil {
+		return nil
+	}
+	status := userCache.GetUserLoginStatus(sysBody.UserLoginName)
+	if status != UserCache.LoginStatus {
+		return nil
+	}
+
+	SendOnlineUserList(sysBody.UserLoginName, conn)
+
 	return pack
 }
 

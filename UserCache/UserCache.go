@@ -90,6 +90,18 @@ func orgInit() {
 		OrgCacheData.addCache(item)
 	}
 }
+func (userCache *UserCache) GetJson() []byte {
+	cache := make(map[string]interface{})
+	for k, v := range userCache.userCacheMap {
+		b, _ := json.Marshal(v)
+		cache[k] = b
+	}
+	marshal, err := json.Marshal(cache)
+	if err != nil {
+		return nil
+	}
+	return marshal
+}
 
 func (userCache *UserCache) GetOnlineUsers() string {
 	keys := ""

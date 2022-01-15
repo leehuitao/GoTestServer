@@ -66,7 +66,9 @@ private slots:
 
     void on_emoji_btn_clicked();
 
-    void slotGetOrg(QJsonDocument body);
+    void slotGetOrg(QJsonDocument json);
+
+    void slotGetUserOrg(QJsonDocument json);
 
 private:
     void init();

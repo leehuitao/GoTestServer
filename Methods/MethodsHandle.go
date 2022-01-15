@@ -82,6 +82,23 @@ func GetDeptOrg(pack *PackManager.Pack, conn net.Conn) (requestPack *PackManager
 	return pack
 }
 
+// GetUserDeptOrg 发送组织架构
+func GetUserDeptOrg(pack *PackManager.Pack, conn net.Conn) (requestPack *PackManager.Pack) {
+	sysBody := PackManager.SystemBody{}
+	if err := json.Unmarshal(pack.Body, &sysBody); err != nil {
+		return nil
+	}
+	status := userCache.GetUserLoginStatus(sysBody.UserLoginName)
+	if status != UserCache.LoginStatus {
+		return nil
+	}
+
+	pack.Body = userCache.GetJson()
+	data := createSendBuffer(*pack)
+	conn.Write(data)
+	return pack
+}
+
 // GetOnlineUsers 发送在线人员列表
 func GetOnlineUsers(pack *PackManager.Pack, conn net.Conn) (requestPack *PackManager.Pack) {
 	sysBody := PackManager.SystemBody{}

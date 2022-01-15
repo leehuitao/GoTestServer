@@ -145,6 +145,7 @@ func Register() {
 	MethodMap[PackManager.ContinueSend2File] = SendFileContinue
 	MethodMap[PackManager.GetOrg] = GetDeptOrg
 	MethodMap[PackManager.GetOnlineUser] = GetOnlineUsers
+	MethodMap[PackManager.GetUserOrg] = GetUserDeptOrg
 
 }
 

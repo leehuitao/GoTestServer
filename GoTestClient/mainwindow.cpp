@@ -204,6 +204,7 @@ void MainWindow::init(){
     connect(m_tcpClient ,&TcpClient::signSendFileProgress,  this,&MainWindow::slotSendFileProgress          ,Qt::QueuedConnection);
     connect(m_tcpClient ,&TcpClient::signRecvFileCompelte,  this,&MainWindow::slotRecvFileCompelte          ,Qt::QueuedConnection);
     connect(m_tcpClient ,&TcpClient::signGetOrg,            this,&MainWindow::slotGetOrg                    ,Qt::QueuedConnection);
+    connect(m_tcpClient ,&TcpClient::signGetUserOrg,        this,&MainWindow::slotGetUserOrg                    ,Qt::QueuedConnection);
 
     m_tcpClient->moveToThread(t1);
     t1->start();
@@ -277,7 +278,18 @@ void MainWindow::on_emoji_btn_clicked()
 
 void MainWindow::slotGetOrg(QJsonDocument json)
 {
-    //获取组织架构后更新在线人员
+    qDebug()<<json;
+    //获取组织架构后更新人员组织
+    SystemBody body;
+    body.UserLoginName  = AppCache::Instance()->m_userName;
+    body.SystemCMD      = "0";
+    signGetOrg(body,GetUserOrg,0);
+}
+
+void MainWindow::slotGetUserOrg(QJsonDocument json)
+{
+    qDebug()<<json;
+    //获取人员组织后更新在线人员
     SystemBody body;
     body.UserLoginName  = AppCache::Instance()->m_userName;
     body.SystemCMD      = "0";

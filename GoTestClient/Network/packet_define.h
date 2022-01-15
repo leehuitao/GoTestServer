@@ -25,6 +25,7 @@
 #define     UpdateOnlineUser            201
 #define     GetOrg                      300
 #define     GetOnlineUser               301
+#define     GetUserOrg                  302
 
 #define     UserLogoffStatus    0
 #define     UserLoginStatus     1

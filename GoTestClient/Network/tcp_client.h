@@ -40,6 +40,8 @@ signals:
     void signRecvFileCompelte(QString filename ,QString type);
 
     void signGetOrg(QJsonDocument body);
+
+    void signGetUserOrg(QJsonDocument body);
 public slots:
     void sendLogin(QString  ip,int port ,LoginBody body);
 

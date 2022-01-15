@@ -184,6 +184,10 @@ void TcpClient::receiveData()
             qDebug()<<"OnlineUserList";
             QString userList(arr);
             signOnlineUserList(userList);
+        }else if(method == GetUserOrg){
+            QJsonParseError jsonError;
+            QJsonDocument jsonDoc(QJsonDocument::fromJson(arr, &jsonError));
+            signGetUserOrg(jsonDoc);
         }
         delete [] rbytes;
         buffer = m_buffer.right(totalLen - size);

@@ -20,6 +20,7 @@ const (
 	UpdateOnlineUser  = 201
 	GetOrg            = 300
 	GetOnlineUser     = 301
+	GetUserOrg        = 302
 )
 
 // Header -----------------一级协议包--------------------

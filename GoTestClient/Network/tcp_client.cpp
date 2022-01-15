@@ -55,6 +55,20 @@ void TcpClient::sendFile(FileBody body, int method, int methodType)
     m_fileThreadList->start();
 }
 
+void TcpClient::sendGetOrg(SystemBody body, int method, int methodType)
+{
+    Pack pack(body,method,methodType);
+    auto data = pack.toByte();
+    m_socket->write(data);
+}
+
+void TcpClient::sendGetOnlineUsers(SystemBody body, int method, int methodType)
+{
+    Pack pack(body,method,methodType);
+    auto data = pack.toByte();
+    m_socket->write(data);
+}
+
 void TcpClient::init()
 {
 
@@ -162,6 +176,14 @@ void TcpClient::receiveData()
             OnlineListBody body;
             body = m_packProcess.parseOnlineListBodyPack(arr);
             signOnlineUserUpdate(body);
+        }else if(method == GetOrg){
+            QJsonParseError jsonError;
+            QJsonDocument jsonDoc(QJsonDocument::fromJson(arr, &jsonError));
+            signGetOrg(jsonDoc);
+        }else if(method == GetOnlineUser){
+            qDebug()<<"OnlineUserList";
+            QString userList(arr);
+            signOnlineUserList(userList);
         }
         delete [] rbytes;
         buffer = m_buffer.right(totalLen - size);

@@ -36,7 +36,7 @@ func goLogDebug(fileName string) {
 	for {
 		select {
 		case data := <-debugChannel:
-			logger.Println(data)
+			logger.Println(data + "")
 			fmt.Println(data)
 		}
 	}

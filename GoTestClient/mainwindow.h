@@ -29,6 +29,10 @@ signals:
     void signSendMsg(MsgBody body, int method ,int methodType);
 
     void signSendFile(FileBody body, int method ,int methodType);
+
+    void signGetOrg(SystemBody body, int method ,int methodType);
+
+    void signOnlineUsers(SystemBody body, int method ,int methodType);
 private slots:
     void on_login_btn_clicked();
 
@@ -48,7 +52,6 @@ private slots:
 
     void slotRecvOnlineUserList(QString userList);
 
-
     void slotOnlineUserUpdate(OnlineListBody body);
 
     QString getCurrentTimeSeconds();
@@ -63,10 +66,11 @@ private slots:
 
     void on_emoji_btn_clicked();
 
+    void slotGetOrg(QJsonDocument body);
+
 private:
     void init();
     void setBottom();
-
     void initDB();
 private:
     Ui::MainWindow *ui;

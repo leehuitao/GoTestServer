@@ -6,6 +6,7 @@
 #include <QNetworkInterface>
 #include <QScrollBar>
 #include <QThread>
+#include <QJsonDocument>
 #include "app_cache.h"
 #include "message_box_widget.h"
 MainWindow::MainWindow(QWidget *parent)
@@ -103,6 +104,10 @@ void MainWindow::slotLoginStatus(int status, QString str)
     if(status){
         ui->login_status_lab->setStyleSheet("background-color: rgb(0, 255, 0);");
         ui->login_btn->setText("quit");
+        SystemBody body;//登录获取组织架构
+        body.UserLoginName  = AppCache::Instance()->m_userName;
+        body.SystemCMD      = "0";
+        signGetOrg(body,GetOrg,0);
     }else{
         ui->login_status_lab->setStyleSheet("background-color: rgb(255, 0, 0);");
         ui->login_btn->setText("login");
@@ -187,6 +192,8 @@ void MainWindow::init(){
     connect(this,&MainWindow::signLogout,               m_tcpClient,&TcpClient::sendLogout                ,Qt::QueuedConnection);
     connect(this,&MainWindow::signSendMsg,              m_tcpClient,&TcpClient::sendMsg                   ,Qt::QueuedConnection);
     connect(this,&MainWindow::signSendFile,             m_tcpClient,&TcpClient::sendFile                  ,Qt::QueuedConnection);
+    connect(this,&MainWindow::signGetOrg,               m_tcpClient,&TcpClient::sendGetOrg                ,Qt::QueuedConnection);
+    connect(this,&MainWindow::signOnlineUsers,          m_tcpClient,&TcpClient::sendGetOnlineUsers        ,Qt::QueuedConnection);
 
     connect(m_tcpClient ,&TcpClient::signLoginStatus,       this,&MainWindow::slotLoginStatus               ,Qt::QueuedConnection);
     connect(m_tcpClient ,&TcpClient::signLoginBody,         this,&MainWindow::slotLoginBody                 ,Qt::QueuedConnection);
@@ -196,6 +203,7 @@ void MainWindow::init(){
     connect(m_tcpClient ,&TcpClient::signOnlineUserUpdate,  this,&MainWindow::slotOnlineUserUpdate          ,Qt::QueuedConnection);
     connect(m_tcpClient ,&TcpClient::signSendFileProgress,  this,&MainWindow::slotSendFileProgress          ,Qt::QueuedConnection);
     connect(m_tcpClient ,&TcpClient::signRecvFileCompelte,  this,&MainWindow::slotRecvFileCompelte          ,Qt::QueuedConnection);
+    connect(m_tcpClient ,&TcpClient::signGetOrg,            this,&MainWindow::slotGetOrg                    ,Qt::QueuedConnection);
 
     m_tcpClient->moveToThread(t1);
     t1->start();
@@ -265,4 +273,13 @@ void MainWindow::on_emoji_btn_clicked()
         m_emojiWidget->hide();
     }
 
+}
+
+void MainWindow::slotGetOrg(QJsonDocument json)
+{
+    //获取组织架构后更新在线人员
+    SystemBody body;
+    body.UserLoginName  = AppCache::Instance()->m_userName;
+    body.SystemCMD      = "0";
+    signGetOrg(body,GetOnlineUser,0);
 }

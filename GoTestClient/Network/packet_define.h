@@ -11,6 +11,8 @@
 #include <QJsonArray>
 #include <QDataStream>
 #include <QDebug>
+#define     HeaderSize 12
+
 #define     Login                       100
 #define     Logout                      101
 #define     MsgMethod                   102
@@ -21,7 +23,8 @@
 #define     ContinueGetFile             107
 #define     OnlineUserList              200
 #define     UpdateOnlineUser            201
-#define     HeaderSize 12
+#define     GetOrg                      300
+#define     GetOnlineUser               301
 
 #define     UserLogoffStatus    0
 #define     UserLoginStatus     1
@@ -78,6 +81,10 @@ struct OnlineListBody  {
     int         Status;
 };
 
+struct SystemBody  {
+    QString     UserLoginName;
+    QString     SystemCMD;
+};
 
 // Header 协议头
 struct Header  {
@@ -164,6 +171,20 @@ struct Pack  {
 
 
     }
+    Pack(SystemBody body, int method ,int methodType){
+
+        QJsonObject json;//构建json对象json
+        json.insert("UserLoginName", body.UserLoginName);
+        json.insert("SystemCMD", body.SystemCMD);
+        QJsonDocument document;
+        document.setObject(json);
+        QByteArray byte_array = document.toJson(QJsonDocument::Compact);
+        Body = byte_array;
+        Header.Method = method;
+        Header.MethodType = methodType;
+        Header.PackSize =HeaderSize +   Body.size();
+    }
+
 
     QByteArray toByte(){
         QByteArray m_buffer;
@@ -174,5 +195,7 @@ struct Pack  {
         return m_buffer;
     }
 };
+
+
 
 #endif // PACKET_DEFINE_H

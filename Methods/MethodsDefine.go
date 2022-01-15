@@ -197,7 +197,7 @@ func SendOnlineUserList(UserName string, conn net.Conn) (requestPack *PackManage
 	onlineList := userCache.GetOnlineUsers()
 	b := []byte(onlineList)
 	resPack := PackManager.Pack{}
-	resPack.Header.Method = PackManager.OnlineUserList
+	resPack.Header.Method = PackManager.GetOnlineUser
 	resPack.Header.MethodType = 0
 	resPack.Body = b
 	data := createSendBuffer(resPack)

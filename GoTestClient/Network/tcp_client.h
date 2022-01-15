@@ -38,6 +38,8 @@ signals:
     void signRecvFileProgress(int totalsize,int currentsize,int sendstatus);
 
     void signRecvFileCompelte(QString filename ,QString type);
+
+    void signGetOrg(QJsonDocument body);
 public slots:
     void sendLogin(QString  ip,int port ,LoginBody body);
 
@@ -46,6 +48,10 @@ public slots:
     void sendMsg(MsgBody body, int method ,int methodType);
 
     void sendFile(FileBody body, int method ,int methodType);
+
+    void sendGetOrg(SystemBody body, int method ,int methodType);
+
+    void sendGetOnlineUsers(SystemBody body, int method ,int methodType);
 private slots:
     void init();
 

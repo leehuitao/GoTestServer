@@ -11,6 +11,8 @@ void registerStruct(){
     qRegisterMetaType<FileBody>("FileBody");
     qRegisterMetaType<MsgBody>("MsgBody");
     qRegisterMetaType<OnlineListBody>("OnlineListBody");
+    qRegisterMetaType<SystemBody>("SystemBody");
+
 
 
 }

@@ -72,8 +72,14 @@ private slots:
 
 private:
     void init();
+
     void setBottom();
+
     void initDB();
+
+    void drawOrg(QJsonDocument);
+
+    void drawUserOrg(QJsonDocument);
 private:
     Ui::MainWindow *ui;
     TcpClient   *   m_tcpClient;

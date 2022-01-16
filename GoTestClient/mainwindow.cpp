@@ -244,6 +244,60 @@ void MainWindow::initDB()
 
 }
 
+void MainWindow::drawOrg(QJsonDocument json)
+{
+    auto jsonobj = json.object();
+    auto keys    = jsonobj.keys();
+    for(auto it : keys){
+        auto jval = jsonobj.value(it);
+
+        QByteArray details = QByteArray::fromBase64(jval.toString().toLocal8Bit().data());
+
+        qDebug()<<"jval 1"<<details;
+        QJsonParseError jsonError;
+        QJsonDocument jsonDoc(QJsonDocument::fromJson(details, &jsonError));
+        if(jsonError.error != QJsonParseError::NoError)
+        {
+            qDebug() << "json error!" << jsonError.errorString();
+            return;
+        }
+        auto values = jsonDoc.object();
+        QString deptName = values.value("DeptName").toString();
+        int DeptID = values.value("DeptID").toInt();
+        int ParentDeptID = values.value("ParentDeptID").toInt();
+        int Level = values.value("Level").toInt();
+        qDebug()<<"deptName = "<<deptName<<"DeptID = "<<DeptID<<"ParentDeptID = "<<ParentDeptID<<"Level = "<<Level;
+    }
+}
+
+void MainWindow::drawUserOrg(QJsonDocument json)
+{
+    auto jsonobj = json.object();
+    auto keys    = jsonobj.keys();
+    for(auto it : keys){
+        auto jval = jsonobj.value(it);
+
+        QByteArray details = QByteArray::fromBase64(jval.toString().toLocal8Bit().data());
+
+        qDebug()<<"jval 1"<<details;
+        QJsonParseError jsonError;
+        QJsonDocument jsonDoc(QJsonDocument::fromJson(details, &jsonError));
+        if(jsonError.error != QJsonParseError::NoError)
+        {
+            qDebug() << "json error!" << jsonError.errorString();
+            return;
+        }
+        auto values = jsonDoc.object();
+        QString UserName = values.value("UserName").toString();
+        QString UserLoginName = values.value("UserLoginName").toString();
+        QString PassWord = values.value("PassWord").toString();
+        QString MacAddress = values.value("MacAddress").toString();
+        int     ParentDeptID = values.value("ParentDeptID").toInt();
+        qDebug()<<"UserName = "<<UserName<<"UserLoginName = "<<UserLoginName
+               <<"PassWord = "<<PassWord<<"MacAddress = "<<MacAddress<<"ParentDeptID = "<<ParentDeptID;
+    }
+}
+
 void MainWindow::on_listWidget_currentTextChanged(const QString &currentText)
 {
     qDebug()<<__FUNCTION__<<currentText<<" clicked ";
@@ -279,11 +333,14 @@ void MainWindow::on_emoji_btn_clicked()
 void MainWindow::slotGetOrg(QJsonDocument json)
 {
     qDebug()<<json;
+
     //获取组织架构后更新人员组织
     SystemBody body;
     body.UserLoginName  = AppCache::Instance()->m_userName;
     body.SystemCMD      = "0";
+    drawOrg(json);
     signGetOrg(body,GetUserOrg,0);
+
 }
 
 void MainWindow::slotGetUserOrg(QJsonDocument json)
@@ -293,5 +350,6 @@ void MainWindow::slotGetUserOrg(QJsonDocument json)
     SystemBody body;
     body.UserLoginName  = AppCache::Instance()->m_userName;
     body.SystemCMD      = "0";
+    drawUserOrg(json);
     signGetOrg(body,GetOnlineUser,0);
 }

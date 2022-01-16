@@ -15,6 +15,8 @@ public:
     OnlineListBody  parseOnlineListBodyPack(QByteArray arr);
 
     FileBody        parseFileDataPack(QByteArray arr);
+
+
 };
 
 #endif // PACKETPROCESS_H

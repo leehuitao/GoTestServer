@@ -9,6 +9,18 @@
 #include <QDebug>
 #include <QMutexLocker>
 #include <QVector>
+struct UserStruct{
+    QString  UserName       ;
+    QString  UserLoginName  ;
+    int      ParentDeptID   ;
+};
+
+struct DeptStruct{
+    QString     DeptName     ;
+    int         DeptID       ;
+    int         ParentDeptID ;
+    int         Level        ;
+};
 class AppCache: public QObject
 {
 public:

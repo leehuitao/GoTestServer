@@ -7,7 +7,7 @@
 #include <QScrollBar>
 #include <QThread>
 #include <QJsonDocument>
-#include "app_cache.h"
+#include <QStandardItemModel>
 #include "message_box_widget.h"
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -138,11 +138,13 @@ void MainWindow::slotRecvFileProgress(int totalsize, int currentsize,int sendsta
 void MainWindow::slotRecvOnlineUserList(QString userList)
 {
     qDebug()<<__FUNCTION__<<userList;
-    ui->listWidget->clear();
     QStringList list = userList.split(",");
     for(auto it : list){
         if(!it.isEmpty()){
-            ui->listWidget->addItem(it);
+            if(it == AppCache::Instance()->m_userName)
+                m_userName2UiPointer[it]->setIcon(QIcon("D:/LHT/GoTestServer/GoTestClient/resource/self.png"));
+            else
+                m_userName2UiPointer[it]->setIcon(QIcon("D:/LHT/GoTestServer/GoTestClient/resource/other.png"));
         }
     }
 }
@@ -150,13 +152,12 @@ void MainWindow::slotRecvOnlineUserList(QString userList)
 void MainWindow::slotOnlineUserUpdate(OnlineListBody body)
 {
     if(body.Status == UserLoginStatus){
-        ui->listWidget->addItem(body.UserLoginName);
+        if(body.UserLoginName == AppCache::Instance()->m_userName)
+            m_userName2UiPointer[body.UserLoginName]->setIcon(QIcon("D:/LHT/GoTestServer/GoTestClient/resource/self.png"));
+        else
+            m_userName2UiPointer[body.UserLoginName]->setIcon(QIcon("D:/LHT/GoTestServer/GoTestClient/resource/other.png"));
     }else if(body.Status == UserLogoffStatus){
-        auto item = ui->listWidget->findItems(body.UserLoginName,Qt::MatchExactly);
-        if(item.size() == 1){
-            ui->listWidget->removeItemWidget(item.at(0));
-            delete item.at(0);
-        }
+        m_userName2UiPointer[body.UserLoginName]->setIcon(QIcon("D:/LHT/GoTestServer/GoTestClient/resource/offline.png"));
     }
 }
 
@@ -219,7 +220,15 @@ void MainWindow::init(){
         //cursor.movePosition(QTextCursor::End);
         cursor.insertImage(QString(":/resource/emoji/%1.gif").arg(number+1));
     });
-
+    m_pModel = new QStandardItemModel(ui->treeView);
+    ui->treeView->header()->hide();
+    ui->treeView->setModel(m_pModel);
+    ui->treeView->setEditTriggers(QHeaderView::NoEditTriggers);
+    ui->treeView->setIconSize(QSize(40,40));
+    ui->treeView->setSelectionMode(QAbstractItemView::SingleSelection);
+    ui->treeView->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui->treeView, SIGNAL(clicked(QModelIndex)),
+            this, SLOT(clicked(QModelIndex)));
 }
 
 void MainWindow::setBottom()
@@ -246,6 +255,7 @@ void MainWindow::initDB()
 
 void MainWindow::drawOrg(QJsonDocument json)
 {
+    m_deptListMap.clear();
     auto jsonobj = json.object();
     auto keys    = jsonobj.keys();
     for(auto it : keys){
@@ -266,7 +276,24 @@ void MainWindow::drawOrg(QJsonDocument json)
         int DeptID = values.value("DeptID").toInt();
         int ParentDeptID = values.value("ParentDeptID").toInt();
         int Level = values.value("Level").toInt();
+        DeptStruct d;
+        d.DeptName = deptName;
+        d.DeptID = DeptID;
+        d.ParentDeptID = ParentDeptID;
+        d.Level = Level;
         qDebug()<<"deptName = "<<deptName<<"DeptID = "<<DeptID<<"ParentDeptID = "<<ParentDeptID<<"Level = "<<Level;
+        m_deptListMap[Level].append(d);
+    }
+    for(auto it : m_deptListMap){
+        for(auto item : it){
+            auto group = new QStandardItem(item.DeptName);
+            m_id2UiPointer[item.DeptID] = group;
+            if(item.ParentDeptID != 0){
+                m_id2UiPointer[item.ParentDeptID]->appendRow(group);
+            }else{
+                m_pModel->appendRow(group);
+            }
+        }
     }
 }
 
@@ -290,14 +317,32 @@ void MainWindow::drawUserOrg(QJsonDocument json)
         auto values = jsonDoc.object();
         QString UserName = values.value("UserName").toString();
         QString UserLoginName = values.value("UserLoginName").toString();
-        QString PassWord = values.value("PassWord").toString();
-        QString MacAddress = values.value("MacAddress").toString();
         int     ParentDeptID = values.value("ParentDeptID").toInt();
         qDebug()<<"UserName = "<<UserName<<"UserLoginName = "<<UserLoginName
-               <<"PassWord = "<<PassWord<<"MacAddress = "<<MacAddress<<"ParentDeptID = "<<ParentDeptID;
+               <<"ParentDeptID = "<<ParentDeptID;
+        UserStruct u;
+        u.UserName = UserName;
+        u.UserLoginName = UserLoginName;
+        u.ParentDeptID = ParentDeptID;
+        m_userListMap[ParentDeptID].append(u);
+    }
+    for(auto it : m_userListMap){
+        for(auto user : it){
+            auto item = new QStandardItem();
+            item->setIcon(QIcon("D:/LHT/GoTestServer/GoTestClient/resource/offline.png"));
+            item->setText(user.UserName);
+            item->setSizeHint(QSize(200,50));
+            item->setWhatsThis(user.UserLoginName);
+            m_id2UiPointer[user.ParentDeptID]->appendRow(item);
+            m_userName2UiPointer[user.UserLoginName] = item;
+        }
     }
 }
-
+void MainWindow::clicked(const QModelIndex &index)
+{
+    m_currentChoiseUser = index.data(Qt::WhatsThisRole).toString();
+    qDebug()<<index.data()<<index.data(Qt::WhatsThisRole);
+}
 void MainWindow::on_listWidget_currentTextChanged(const QString &currentText)
 {
     qDebug()<<__FUNCTION__<<currentText<<" clicked ";

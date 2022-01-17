@@ -74,6 +74,7 @@ type LoginBody struct {
 	MacAddress    string `json:"MacAddress"`
 	LoginTime     string `json:"LoginTime"`
 	LoginStatus   int    `json:"LoginStatus"`
+	ParentDeptID  int    `json:"ParentDeptID"`
 }
 
 // SystemBody  系统指令json

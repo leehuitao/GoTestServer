@@ -63,7 +63,9 @@ func SelectUserCache(sql string) map[string]UserData {
 	user := make(map[string]UserData)
 	for rows.Next() {
 		userData := UserData{}
-		err := rows.Scan(&userData.id, &userData.UserName, &userData.UserLoginName, &userData.PassWord, &userData.Notice, &userData.MacAddress, &userData.LoginTime, &userData.ParentDeptID)
+		err := rows.Scan(&userData.id, &userData.UserName, &userData.UserLoginName,
+			&userData.PassWord, &userData.Notice, &userData.MacAddress,
+			&userData.LoginTime, &userData.ParentDeptID)
 		user[userData.UserLoginName] = userData
 		checkErr(err)
 	}

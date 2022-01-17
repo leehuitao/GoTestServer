@@ -7,7 +7,8 @@
 #include <QSqlDatabase>
 #include <QSqlQuery>
 #include <QSqlError>
-
+#include <QStandardItemModel>
+#include "app_cache.h"
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -87,5 +88,12 @@ private:
     QString         m_currentChoiseUser;
     QString         m_userName;
     EmotionWidget * m_emojiWidget;
+    QStandardItemModel*         m_pModel;
+    QMap<int,QList<UserStruct>> m_userListMap;
+    QMap<int,QList<DeptStruct>> m_deptListMap;
+    QMap<int,QStandardItem*> m_id2UiPointer;
+    QMap<QString,QStandardItem*> m_userName2UiPointer;
+private slots:
+    void clicked(const QModelIndex &index);
 };
 #endif // MAINWINDOW_H

@@ -74,6 +74,7 @@ func mysqlInit(cache *UserCache) {
 		body.PassWord = v.PassWord
 		body.MacAddress = v.MacAddress
 		body.UserLoginName = v.UserLoginName
+		body.ParentDeptID = v.ParentDeptID
 		cache.userCacheMap[k] = body
 	}
 }
@@ -142,7 +143,7 @@ func (userCache *UserCache) GetUserName(userLoginName string) (string, error) {
 }
 
 func (userCache *UserCache) AddUserCache(userId string, LoginCache PackManager.LoginBody, Address string) {
-	userCache.userCacheMap[userId] = LoginCache
+	//userCache.userCacheMap[userId] = LoginCache
 	userCache.userLoginAddress[userId] = Address
 }
 

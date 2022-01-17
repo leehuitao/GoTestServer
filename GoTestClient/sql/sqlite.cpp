@@ -20,7 +20,7 @@ void Sqlite::initDB()
 void Sqlite::insertHistoryMsg(QString BelongUser, QString SendUser, QString RecvUser, QString Content, QString SendTime, int MsgType)
 {
     QSqlQuery query;
-    QString str = QString(insertMsg).arg(BelongUser).arg(SendUser).arg(RecvUser).arg(QString(QByteArray(Content.toLocal8Bit().data()).toBase64())).arg(SendTime).arg(MsgType);
+    QString str = QString(insertMsg).arg(BelongUser).arg(SendUser).arg(RecvUser).arg(QString(QByteArray(Content.toUtf8().data()).toBase64())).arg(SendTime).arg(MsgType);
     query.exec(str);
     qDebug()<<query.lastError();
 }

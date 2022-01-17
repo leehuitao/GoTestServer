@@ -117,8 +117,10 @@ void MainWindow::slotLoginStatus(int status, QString str)
 
 void MainWindow::slotRecvMsg(MsgBody body)
 {
-    MessageBoxWidget *w = new MessageBoxWidget(body,ui->scrollArea->width()-18);
-    ui->verticalLayout->insertWidget(AppCache::Instance()->m_msgSize++,w);
+    if(body.UserLoginName == m_currentChoiseUser){
+        MessageBoxWidget *w = new MessageBoxWidget(body,ui->scrollArea->width()-18);
+        ui->verticalLayout->insertWidget(AppCache::Instance()->m_msgSize++,w);
+    }
     qDebug()<<__FUNCTION__<<body.Msg;
     m_sql.insertHistoryMsg(body.UserLoginName,body.UserLoginName,body.DstUser,body.Msg,getCurrentTime(),0);
 }

@@ -23,7 +23,8 @@ SOURCES += \
     emotion_widget.cpp \
     main.cpp \
     mainwindow.cpp \
-    message_box_widget.cpp
+    message_box_widget.cpp \
+    sql/sqlite.cpp
 
 HEADERS += \
     File/file_thread.h \
@@ -33,7 +34,9 @@ HEADERS += \
     app_cache.h \
     emotion_widget.h \
     mainwindow.h \
-    message_box_widget.h
+    message_box_widget.h \
+    sql/db_define.h \
+    sql/sqlite.h
 
 FORMS += \
     emotion_widget.ui \

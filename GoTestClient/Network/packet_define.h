@@ -11,6 +11,7 @@
 #include <QJsonArray>
 #include <QDataStream>
 #include <QDebug>
+#include "sql/db_define.h"
 #define     HeaderSize 12
 
 #define     Login                       100
@@ -46,6 +47,13 @@ static QString createUuid(){
 }
 
 struct MsgBody  {
+    MsgBody(){}
+    MsgBody(const HistoryMsgStruct & msg){
+        this->Msg = msg.Content;
+        this->DstUser = msg.RecvUser;
+        this->UserLoginName = msg.SendUser;
+        this->MsgType       = msg.MsgType;
+    }
     QString     UserName;
     QString     UserLoginName;
     QString     DstUser;

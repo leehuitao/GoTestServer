@@ -9,6 +9,13 @@
 #include <QDebug>
 #include <QMutexLocker>
 #include <QVector>
+
+static QString getCurrentTime(){
+    QDateTime current_date_time =QDateTime::currentDateTime();
+    QString current_date =current_date_time.toString("yyyy-MM-dd-hh-mm-ss-zzz");
+    return current_date;
+}
+
 struct UserStruct{
     QString  UserName       ;
     QString  UserLoginName  ;

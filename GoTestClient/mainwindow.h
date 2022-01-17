@@ -9,6 +9,7 @@
 #include <QSqlError>
 #include <QStandardItemModel>
 #include "app_cache.h"
+#include "sql/sqlite.h"
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -93,6 +94,7 @@ private:
     QMap<int,QList<DeptStruct>> m_deptListMap;
     QMap<int,QStandardItem*> m_id2UiPointer;
     QMap<QString,QStandardItem*> m_userName2UiPointer;
+    Sqlite          m_sql;
 private slots:
     void clicked(const QModelIndex &index);
 };

@@ -67,7 +67,7 @@ void MainWindow::on_sendmsg_btn_clicked()
     MessageBoxWidget *w = new MessageBoxWidget(body,ui->scrollArea->width()-18);
     ui->verticalLayout->insertWidget(AppCache::Instance()->m_msgSize++,w);
     ui->scrollArea->ensureWidgetVisible(w);
-
+    m_sql.insertHistoryMsg(m_currentChoiseUser,AppCache::Instance()->m_userName,m_currentChoiseUser,body.Msg,getCurrentTime(),0);
 }
 
 void MainWindow::on_file_select_btn_clicked()
@@ -120,6 +120,7 @@ void MainWindow::slotRecvMsg(MsgBody body)
     MessageBoxWidget *w = new MessageBoxWidget(body,ui->scrollArea->width()-18);
     ui->verticalLayout->insertWidget(AppCache::Instance()->m_msgSize++,w);
     qDebug()<<__FUNCTION__<<body.Msg;
+    m_sql.insertHistoryMsg(body.UserLoginName,body.UserLoginName,body.DstUser,body.Msg,getCurrentTime(),0);
 }
 
 void MainWindow::slotSendFileProgress(int totalsize, int currentsize)
@@ -243,13 +244,7 @@ void MainWindow::setBottom()
 
 void MainWindow::initDB()
 {
-//    QSqlDatabase db;
-//    db = QSqlDatabase::addDatabase("QSQLITE", "MTPSQLLITE3");
-//    db.setDatabaseName("user.db");
-//    db.open();
-//    QSqlQuery query(db);
-//    QString str = "create table usercache (id int ,name varchar(50))";
-//    query.exec(str);
+    m_sql.initDB();
 
 }
 
@@ -340,7 +335,22 @@ void MainWindow::drawUserOrg(QJsonDocument json)
 }
 void MainWindow::clicked(const QModelIndex &index)
 {
+    while(auto child = ui->verticalLayout->takeAt(0))
+    {
+        if(child->spacerItem() != nullptr)
+            return;
+        QWidget* pWidget = child->widget();
+        pWidget->deleteLater();
+        delete child;
+    }
+    AppCache::Instance()->m_msgSize = 0;
     m_currentChoiseUser = index.data(Qt::WhatsThisRole).toString();
+    auto list = m_sql.selectHistoryMsg(m_currentChoiseUser);
+    for(auto it : list){
+        MsgBody body(it);
+        MessageBoxWidget *w = new MessageBoxWidget(body,ui->scrollArea->width()-18,body.MsgType);
+        ui->verticalLayout->insertWidget(AppCache::Instance()->m_msgSize++,w);
+    }
     qDebug()<<index.data()<<index.data(Qt::WhatsThisRole);
 }
 void MainWindow::on_listWidget_currentTextChanged(const QString &currentText)
@@ -356,6 +366,7 @@ void MainWindow::slotRecvFileCompelte(QString filename, QString UserLoginName)
     body.Msg = "接收文件成功:"+filename;
     MessageBoxWidget *w = new MessageBoxWidget(body,ui->scrollArea->width()-18,1);
     ui->verticalLayout->insertWidget(AppCache::Instance()->m_msgSize++,w);
+    m_sql.insertHistoryMsg(body.UserLoginName,body.UserLoginName,AppCache::Instance()->m_userName,body.Msg,getCurrentTime(),1);
 }
 
 void MainWindow::slotLoginBody(LoginBody body)

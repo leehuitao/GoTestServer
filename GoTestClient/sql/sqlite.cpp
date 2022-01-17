@@ -20,26 +20,29 @@ void Sqlite::initDB()
 void Sqlite::insertHistoryMsg(QString BelongUser, QString SendUser, QString RecvUser, QString Content, QString SendTime, int MsgType)
 {
     QSqlQuery query;
-    query.exec(QString(insertMsg).arg(BelongUser).arg(SendUser).arg(RecvUser).arg(Content).arg(SendTime).arg(MsgType));
-
+    QString str = QString(insertMsg).arg(BelongUser).arg(SendUser).arg(RecvUser).arg(QString(QByteArray(Content.toLocal8Bit().data()).toBase64())).arg(SendTime).arg(MsgType);
+    query.exec(str);
+    qDebug()<<query.lastError();
 }
 
 HistoryMsgList Sqlite::selectHistoryMsg(QString BelongUser)
 {
     QSqlQuery query;
-    query.exec(QString(selectMsg).arg(BelongUser));
+    QString str = QString(selectMsg).arg(BelongUser);
+    query.exec(str);
     HistoryMsgList list;
     while(query.next()){
         HistoryMsgStruct msg;
         msg.id = query.value(0).toInt();
-        msg.Belong2User = query.value(0).toString();
-        msg.SendUser = query.value(0).toString();
-        msg.RecvUser = query.value(0).toString();
-        msg.Content = query.value(0).toString();
-        msg.SendTime = query.value(0).toString();
-        msg.MsgType = query.value(0).toInt();
+        msg.Belong2User = query.value(1).toString();
+        msg.SendUser = query.value(2).toString();
+        msg.RecvUser = query.value(3).toString();
+        msg.Content = QString(QByteArray::fromBase64(query.value(4).toByteArray()));
+        msg.SendTime = query.value(5).toString();
+        msg.MsgType = query.value(6).toInt();
         list.insert(0,msg);
     }
+    qDebug()<<query.lastError()<<"str = "<<str;
     return list;
 }
 

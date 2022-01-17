@@ -11,7 +11,7 @@
     "MsgType integer                                       "\
     ");"
 #define insertMsg "insert into HistoryMsg (Belong2User,SendUser,RecvUser,Content,SendTime,MsgType) values ('%1','%2','%3','%4','%5',%6)"
-#define selectMsg "select * from HistoryMsg where Belong2User = %1 order by id DESC limit 20;"
+#define selectMsg "select * from HistoryMsg where Belong2User = '%1' order by id DESC limit 20;"
 struct HistoryMsgStruct{
     int             id;
     QString         Belong2User;

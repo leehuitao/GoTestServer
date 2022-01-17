@@ -335,13 +335,13 @@ void MainWindow::drawUserOrg(QJsonDocument json)
 }
 void MainWindow::clicked(const QModelIndex &index)
 {
-    while(auto child = ui->verticalLayout->takeAt(0))
+    QList<MessageBoxWidget*> tlist = this->findChildren<MessageBoxWidget*>(QString("MessageBoxWidget"), Qt::FindChildrenRecursively);
+    foreach(MessageBoxWidget* marker, tlist)
     {
-        if(child->spacerItem() != nullptr)
-            return;
-        QWidget* pWidget = child->widget();
-        pWidget->deleteLater();
-        delete child;
+        if(marker){
+            marker->deleteLater();
+            marker = nullptr;
+        }
     }
     AppCache::Instance()->m_msgSize = 0;
     m_currentChoiseUser = index.data(Qt::WhatsThisRole).toString();

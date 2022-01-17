@@ -16,5 +16,8 @@
         <file>resource/emoji/14.gif</file>
         <file>resource/emoji/15.gif</file>
         <file>resource/emoji/16.gif</file>
+        <file>resource/offline.png</file>
+        <file>resource/other.png</file>
+        <file>resource/self.png</file>
     </qresource>
 </RCC>

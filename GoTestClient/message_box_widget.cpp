@@ -76,14 +76,14 @@ void MessageBoxWidget::create(MsgBody body)
     if(m_isSelfMsg){
         ui->other->hide();
         ui->label_4->setText(body.Msg);
-        ui->label_3->setPixmap(QPixmap("D:/LHT/GoTestServer/GoTestClient/resource/self.png"));
+        ui->label_3->setPixmap(QPixmap(":/resource/self.png"));
         int h = ui->label_4->height();
         //this->setMaximumHeight(h+18);
 
     }else{
         ui->self->hide();
         ui->label_2->setText(body.Msg);
-        ui->label_1->setPixmap(QPixmap("D:/LHT/GoTestServer/GoTestClient/resource/other.png"));
+        ui->label_1->setPixmap(QPixmap(":/resource/other.png"));
         int h = ui->label_2->height();
         //this->setMaximumHeight(h+18);
     }

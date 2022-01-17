@@ -145,9 +145,9 @@ void MainWindow::slotRecvOnlineUserList(QString userList)
     for(auto it : list){
         if(!it.isEmpty()){
             if(it == AppCache::Instance()->m_userName)
-                m_userName2UiPointer[it]->setIcon(QIcon("D:/LHT/GoTestServer/GoTestClient/resource/self.png"));
+                m_userName2UiPointer[it]->setIcon(QIcon(":/resource/self.png"));
             else
-                m_userName2UiPointer[it]->setIcon(QIcon("D:/LHT/GoTestServer/GoTestClient/resource/other.png"));
+                m_userName2UiPointer[it]->setIcon(QIcon(":/resource/other.png"));
         }
     }
 }
@@ -156,11 +156,11 @@ void MainWindow::slotOnlineUserUpdate(OnlineListBody body)
 {
     if(body.Status == UserLoginStatus){
         if(body.UserLoginName == AppCache::Instance()->m_userName)
-            m_userName2UiPointer[body.UserLoginName]->setIcon(QIcon("D:/LHT/GoTestServer/GoTestClient/resource/self.png"));
+            m_userName2UiPointer[body.UserLoginName]->setIcon(QIcon(":/resource/self.png"));
         else
-            m_userName2UiPointer[body.UserLoginName]->setIcon(QIcon("D:/LHT/GoTestServer/GoTestClient/resource/other.png"));
+            m_userName2UiPointer[body.UserLoginName]->setIcon(QIcon(":/resource/other.png"));
     }else if(body.Status == UserLogoffStatus){
-        m_userName2UiPointer[body.UserLoginName]->setIcon(QIcon("D:/LHT/GoTestServer/GoTestClient/resource/offline.png"));
+        m_userName2UiPointer[body.UserLoginName]->setIcon(QIcon(":/resource/offline.png"));
     }
 }
 
@@ -326,7 +326,7 @@ void MainWindow::drawUserOrg(QJsonDocument json)
     for(auto it : m_userListMap){
         for(auto user : it){
             auto item = new QStandardItem();
-            item->setIcon(QIcon("D:/LHT/GoTestServer/GoTestClient/resource/offline.png"));
+            item->setIcon(QIcon(":/resource/offline.png"));
             item->setText(user.UserName);
             item->setSizeHint(QSize(200,50));
             item->setWhatsThis(user.UserLoginName);
@@ -366,8 +366,10 @@ void MainWindow::slotRecvFileCompelte(QString filename, QString UserLoginName)
     MsgBody body;
     body.UserLoginName = UserLoginName;
     body.Msg = "接收文件成功:"+filename;
-    MessageBoxWidget *w = new MessageBoxWidget(body,ui->scrollArea->width()-18,1);
-    ui->verticalLayout->insertWidget(AppCache::Instance()->m_msgSize++,w);
+    if(UserLoginName == m_currentChoiseUser){
+        MessageBoxWidget *w = new MessageBoxWidget(body,ui->scrollArea->width()-18,1);
+        ui->verticalLayout->insertWidget(AppCache::Instance()->m_msgSize++,w);
+    }
     m_sql.insertHistoryMsg(body.UserLoginName,body.UserLoginName,AppCache::Instance()->m_userName,body.Msg,getCurrentTime(),1);
 }
 

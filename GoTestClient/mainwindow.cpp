@@ -252,7 +252,11 @@ void MainWindow::initDB()
 
 void MainWindow::drawOrg(QJsonDocument json)
 {
+    m_pModel->clear();
     m_deptListMap.clear();
+    m_id2UiPointer.clear();
+    m_userName2UiPointer.clear();
+    m_userListMap.clear();
     auto jsonobj = json.object();
     auto keys    = jsonobj.keys();
     for(auto it : keys){

@@ -7,7 +7,7 @@
 #include <boost/noncopyable.hpp>
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
-
+#include "MysqlManager/dbio_mysql.hpp"
 class HandlerManager : private boost::noncopyable
 {
 public:
@@ -45,13 +45,86 @@ const bool HandlerManager::InitHandler(const unsigned short cmd)
 	RegisterHandler::Instance()->InitHandler(cmd, boost::bind(&HandlerManager::NotifyHandler<Handler>, this, _1));
 	return 1;
 }
+
+bool SelectSysSQL(const boost::shared_ptr<DBIO> & sysdbio_,const std::string& strSQL, std::vector<std::vector<std::string>>& vecRes)
+{
+	std::string 		query = strSQL;
+
+	vecRes.clear();
+	if (!sysdbio_)
+		return false;
+
+	long ret_code = SqlRetTypeNormal;
+	vecRes = sysdbio_->selectData(query, ret_code);
+
+	return (ret_code == SqlRetTypeNormal);
+}
+
+bool InsertSysSQL(const boost::shared_ptr<DBIO>& pDBIO,const std::string& strSQL)
+{
+	if (pDBIO == NULL)
+		return false;
+
+	std::string 		query = strSQL;
+
+	return pDBIO->insertData(query);
+
+}
+bool UpdateSysSQL(const boost::shared_ptr<DBIO>& pDBIO, const std::string& strSQL)
+{
+
+	if (pDBIO == NULL)
+		return false;
+
+	std::string 		query = strSQL;
+
+	return pDBIO->updateData(query);
+
+}
+bool DeleteSysSQL(const boost::shared_ptr<DBIO>& pDBIO, const std::string& strSQL)
+{
+
+	if (pDBIO == NULL)
+		return false;
+
+	std::string 		query = strSQL;
+
+	return pDBIO->deleteData(query);
+}
 int main()
 {
-	HandlerManager::Instance().InitHandler<TestMethod>(1);//方法注册
+	//------------------------mysql------------------------------------------
+	boost::shared_ptr<DBIO> pDBIO = NULL;
+
+	pDBIO.reset(new DBIOMysql());
+
+	bool ret = pDBIO->initConnectionPool("dbserver", "dbuser", "dbpassword", "strDBName", 20/*pool size*/, 7777/*port*/);
+	if (ret)
+	{
+		std::cout << "mysql init success";
+		std::vector<std::vector<std::string>> ret;
+		SelectSysSQL(pDBIO,"", ret);
+		InsertSysSQL(pDBIO,"");
+		UpdateSysSQL(pDBIO, "");
+		DeleteSysSQL(pDBIO, "");
+
+
+	}
+	else {
+		std::cout << "mysql init error";
+
+	}
+	//------------------------方法注册------------------------------------------
+	
+	HandlerManager::Instance().InitHandler<TestMethod>(1);
+	//------------------------网络初始化------------------------------------------
 
 	NetworkManager::Instance()->tcpAcceptor(66666);//监听  (登录后再将客户端连接加到连接池里)
 
+	//------------------------启动------------------------------------------
+
 	IOManager::instance().run();//启动服务work
-	
+
+
 	return 0;
 }

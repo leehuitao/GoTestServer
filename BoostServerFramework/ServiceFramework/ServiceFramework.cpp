@@ -8,9 +8,10 @@
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
 #include "MysqlManager/dbio_mysql.hpp"
+#include "Hiredis/redis_manager.h"
 class HandlerManager : private boost::noncopyable
 {
-public:
+public: 
     static HandlerManager& Instance();
 
  
@@ -102,18 +103,18 @@ int main()
 	if (ret)
 	{
 		std::cout << "mysql init success";
-		std::vector<std::vector<std::string>> ret;
-		SelectSysSQL(pDBIO,"", ret);
-		InsertSysSQL(pDBIO,"");
-		UpdateSysSQL(pDBIO, "");
-		DeleteSysSQL(pDBIO, "");
-
-
+		//std::vector<std::vector<std::string>> ret;
+		//SelectSysSQL(pDBIO,"", ret);
+		//InsertSysSQL(pDBIO,"");
+		//UpdateSysSQL(pDBIO, "");
+		//DeleteSysSQL(pDBIO, "");
 	}
 	else {
 		std::cout << "mysql init error";
 
 	}
+	//------------------------redis初始化------------------------------------------
+	RedisManager::Instance()->initRedis();
 	//------------------------方法注册------------------------------------------
 	
 	HandlerManager::Instance().InitHandler<TestMethod>(1);

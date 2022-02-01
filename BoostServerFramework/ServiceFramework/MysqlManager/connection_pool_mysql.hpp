@@ -3,7 +3,7 @@
 #include <string>
 #include <boost/format.hpp>
 #ifdef WIN32
-#include <WinSock2.h>
+#include <windows.h>
 #endif
 #include <mysql/mysql.h>
 #include <mysql/mysqld_error.h>

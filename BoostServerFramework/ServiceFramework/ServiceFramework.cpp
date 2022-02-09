@@ -8,7 +8,7 @@
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
 #include "MysqlManager/dbio_mysql.hpp"
-#include "Hiredis/redis_manager.h"
+#include "Hiredis/dbio_redis.h"
 class HandlerManager : private boost::noncopyable
 {
 public: 
@@ -102,7 +102,7 @@ int main()
 	bool ret = pDBIO->initConnectionPool("dbserver", "dbuser", "dbpassword", "strDBName", 20/*pool size*/, 7777/*port*/);
 	if (ret)
 	{
-		std::cout << "mysql init success";
+		std::cout << "mysql init success" << std::endl;
 		//std::vector<std::vector<std::string>> ret;
 		//SelectSysSQL(pDBIO,"", ret);
 		//InsertSysSQL(pDBIO,"");
@@ -114,7 +114,13 @@ int main()
 
 	}
 	//------------------------redis初始化------------------------------------------
-	RedisManager::Instance()->initRedis();
+	DBIORedis redis;
+	auto status = redis.InitPool("127.0.0.1",6379,"",60,20,100);
+	std::cout << "redis status = " << status<<std::endl;
+	redis.HSet("website","google","www.g.cn");
+	std::string retstr;
+	redis.HGet("website", "google", retstr);
+	std::cout <<"retstr = " << retstr << std::endl;
 	//------------------------方法注册------------------------------------------
 	
 	HandlerManager::Instance().InitHandler<TestMethod>(1);

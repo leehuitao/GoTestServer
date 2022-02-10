@@ -9,6 +9,7 @@
 #include <boost/shared_ptr.hpp>
 #include "MysqlManager/dbio_mysql.hpp"
 #include "Hiredis/dbio_redis.h"
+#include "MongoDB/mongodb_manager.h"
 class HandlerManager : private boost::noncopyable
 {
 public: 
@@ -100,36 +101,17 @@ int main()
 	pDBIO.reset(new DBIOMysql());
 
 	bool ret = pDBIO->initConnectionPool("dbserver", "dbuser", "dbpassword", "strDBName", 20/*pool size*/, 7777/*port*/);
-	if (ret)
-	{
-		std::cout << "mysql init success" << std::endl;
-		//std::vector<std::vector<std::string>> ret;
-		//SelectSysSQL(pDBIO,"", ret);
-		//InsertSysSQL(pDBIO,"");
-		//UpdateSysSQL(pDBIO, "");
-		//DeleteSysSQL(pDBIO, "");
-	}
-	else {
-		std::cout << "mysql init error";
-
-	}
 	//------------------------redis初始化------------------------------------------
 	DBIORedis redis;
 	auto status = redis.InitPool("127.0.0.1",6379,"",60,20,100);
-	std::cout << "redis status = " << status<<std::endl;
-	redis.HSet("website","google","www.g.cn");
-	std::string retstr;
-	redis.HGet("website", "google", retstr);
-	std::cout <<"retstr = " << retstr << std::endl;
+	//------------------------mongodb初始化------------------------------------------
+	MongoDBManager::instance().mongodb_init("mongodb://localhost");
 	//------------------------方法注册------------------------------------------
-	
 	HandlerManager::Instance().InitHandler<TestMethod>(1);
 	//------------------------网络初始化------------------------------------------
-
 	NetworkManager::Instance()->tcpAcceptor(66666);//监听  (登录后再将客户端连接加到连接池里)
 
 	//------------------------启动------------------------------------------
-
 	IOManager::instance().run();//启动服务work
 
 

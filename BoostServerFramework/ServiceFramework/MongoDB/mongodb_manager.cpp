@@ -1,13 +1,13 @@
 #include "mongodb_manager.h"
 
 #include <numeric>
-DBIOMongoDB& DBIOMongoDB::instance()
+MongoDBManager& MongoDBManager::instance()
 {
-	static DBIOMongoDB s_instance;
+	static MongoDBManager s_instance;
 	return s_instance;
 }
 
-bool DBIOMongoDB::mongodb_init(const char* url)
+bool MongoDBManager::mongodb_init(const char* url)
 {
 	MongoDBConnectionPool* client_pool = new MongoDBConnectionPool();
 	client_pool->mongodb_init(url);
@@ -17,14 +17,14 @@ bool DBIOMongoDB::mongodb_init(const char* url)
 	return true;
 }
 
-bool DBIOMongoDB::mongodb_cleanup()
+bool MongoDBManager::mongodb_cleanup()
 {
 	bool ulret = false;
 	MongoDBConnectionPool* dbapi = static_cast<MongoDBConnectionPool*>(m_mongodb_ptr);
 	if (dbapi == nullptr) { return ulret; }
 	return dbapi->destory_client_pool();
 }
-bool DBIOMongoDB::create_index(const char* databasename, const char* collname, const char* keyname, const char* indextype)
+bool MongoDBManager::create_index(const char* databasename, const char* collname, const char* keyname, const char* indextype)
 {
 	bool ulret = false;
 	MongoDBConnectionPool* dbapi = static_cast<MongoDBConnectionPool*>(m_mongodb_ptr);
@@ -32,7 +32,7 @@ bool DBIOMongoDB::create_index(const char* databasename, const char* collname, c
 	return dbapi->create_index(databasename, collname, keyname, indextype);
 }
 
-bool DBIOMongoDB::select_coll(const char* dbname, const char* collname, const char* id_, std::vector<std::map<std::string, std::string>>& msg_data)
+bool MongoDBManager::select_coll(const char* dbname, const char* collname, const char* id_, std::vector<std::map<std::string, std::string>>& msg_data)
 {
 	MongoDBConnectionPool* dbapi = static_cast<MongoDBConnectionPool*>(m_mongodb_ptr);
 	if (dbapi == nullptr) { return false; }
@@ -46,7 +46,7 @@ bool DBIOMongoDB::select_coll(const char* dbname, const char* collname, const ch
 }
 
 
-bool DBIOMongoDB::insert_coll(const char* dbname, const char* collname, const std::map<std::string, std::string>& map_data)
+bool MongoDBManager::insert_coll(const char* dbname, const char* collname, const std::map<std::string, std::string>& map_data)
 {
 	MongoDBConnectionPool* dbapi = static_cast<MongoDBConnectionPool*>(m_mongodb_ptr);
 	if (dbapi == nullptr) { return false; }
@@ -65,7 +65,7 @@ bool DBIOMongoDB::insert_coll(const char* dbname, const char* collname, const st
 	return ret;
 }
 
-bool DBIOMongoDB::insert_coll(const char* dbname, const char* collname, const std::map<std::string, std::string>& map_data, const std::vector<std::string> params, const std::map<std::string, std::string>& props)
+bool MongoDBManager::insert_coll(const char* dbname, const char* collname, const std::map<std::string, std::string>& map_data, const std::vector<std::string> params, const std::map<std::string, std::string>& props)
 {
 	MongoDBConnectionPool* dbapi = static_cast<MongoDBConnectionPool*>(m_mongodb_ptr);
 	if (dbapi == nullptr) { return false; }
@@ -107,7 +107,7 @@ bool DBIOMongoDB::insert_coll(const char* dbname, const char* collname, const st
 	return ret;
 }
 
-bool DBIOMongoDB::delete_coll(const char* dbname, const char* collname, const std::map<std::string, std::string>& map_data)
+bool MongoDBManager::delete_coll(const char* dbname, const char* collname, const std::map<std::string, std::string>& map_data)
 {
 	MongoDBConnectionPool* dbapi = static_cast<MongoDBConnectionPool*>(m_mongodb_ptr);
 	if (dbapi == nullptr) { return false; }
@@ -127,7 +127,7 @@ bool DBIOMongoDB::delete_coll(const char* dbname, const char* collname, const st
 }
 
 
-bool DBIOMongoDB::update_coll(const char* dbname, const char* collname, const std::map<std::string, std::string>& map_qurey,
+bool MongoDBManager::update_coll(const char* dbname, const char* collname, const std::map<std::string, std::string>& map_qurey,
 	const std::string& update_key, const std::string& update_value)
 {
 	MongoDBConnectionPool* dbapi = static_cast<MongoDBConnectionPool*>(m_mongodb_ptr);
@@ -152,7 +152,7 @@ bool DBIOMongoDB::update_coll(const char* dbname, const char* collname, const st
 	return ret;
 }
 
-bool DBIOMongoDB::select_coll(const char* dbname, const char* collname, const std::map<std::string, std::string>& map_data, std::vector<std::map<std::string, std::string>>& msg_data)
+bool MongoDBManager::select_coll(const char* dbname, const char* collname, const std::map<std::string, std::string>& map_data, std::vector<std::map<std::string, std::string>>& msg_data)
 {
 	MongoDBConnectionPool* dbapi = static_cast<MongoDBConnectionPool*>(m_mongodb_ptr);
 	if (dbapi == nullptr) { return false; }
@@ -171,7 +171,7 @@ bool DBIOMongoDB::select_coll(const char* dbname, const char* collname, const st
 	bson_destroy(query);
 	return ret;
 }
-bool DBIOMongoDB::select_coll(const char* dbname, const char* collname,
+bool MongoDBManager::select_coll(const char* dbname, const char* collname,
 	const std::map<std::string, std::string>& map_data,
 	std::vector<std::map<std::string, std::string>>& msg_data,
 	std::vector < std::vector<std::string>>& params,
@@ -197,7 +197,7 @@ bool DBIOMongoDB::select_coll(const char* dbname, const char* collname,
 	return ret;
 }
 
-bool DBIOMongoDB::find_coll(const char* dbname, const char* collname, const std::map<std::string, std::string>& map_data)
+bool MongoDBManager::find_coll(const char* dbname, const char* collname, const std::map<std::string, std::string>& map_data)
 {
 	MongoDBConnectionPool* dbapi = static_cast<MongoDBConnectionPool*>(m_mongodb_ptr);
 	if (dbapi == nullptr) { return false; }
@@ -216,7 +216,7 @@ bool DBIOMongoDB::find_coll(const char* dbname, const char* collname, const std:
 	return ret;
 }
 
-bool DBIOMongoDB::InsertNoticeColl(const char* dbname, const char* collname, const std::map<std::string, std::string> id_map, const std::map<std::string, std::vector<std::map<std::string, std::string>>>& map_data)
+bool MongoDBManager::InsertNoticeColl(const char* dbname, const char* collname, const std::map<std::string, std::string> id_map, const std::map<std::string, std::vector<std::map<std::string, std::string>>>& map_data)
 {
 	MongoDBConnectionPool* dbapi = static_cast<MongoDBConnectionPool*>(m_mongodb_ptr);
 	if (dbapi == nullptr) { return false; }
@@ -266,7 +266,7 @@ bool DBIOMongoDB::InsertNoticeColl(const char* dbname, const char* collname, con
 }
 
 
-bool DBIOMongoDB::PushNoticeColl(const char* dbname, const char* collname, const std::map<std::string, std::string> id_map, const std::map<std::string, std::map<std::string, std::string>>& map_data)
+bool MongoDBManager::PushNoticeColl(const char* dbname, const char* collname, const std::map<std::string, std::string> id_map, const std::map<std::string, std::map<std::string, std::string>>& map_data)
 {
 	MongoDBConnectionPool* dbapi = static_cast<MongoDBConnectionPool*>(m_mongodb_ptr);
 	if (dbapi == nullptr) { return false; }
@@ -303,7 +303,7 @@ bool DBIOMongoDB::PushNoticeColl(const char* dbname, const char* collname, const
 	return ret;
 }
 
-bool DBIOMongoDB::DelNoticeColl(const char* dbname, const char* collname, const std::map<std::string, std::string> id_map, std::map<std::string, std::map<std::string, std::string>>& map_data)
+bool MongoDBManager::DelNoticeColl(const char* dbname, const char* collname, const std::map<std::string, std::string> id_map, std::map<std::string, std::map<std::string, std::string>>& map_data)
 {
 	MongoDBConnectionPool* dbapi = static_cast<MongoDBConnectionPool*>(m_mongodb_ptr);
 	if (dbapi == nullptr) { return false; }
@@ -342,7 +342,7 @@ bool DBIOMongoDB::DelNoticeColl(const char* dbname, const char* collname, const 
 	return ret;
 }
 
-bool DBIOMongoDB::SelectNoticeColl(const char* dbname, const char* collname, const std::map<std::string, std::string> id_map, const std::vector< std::string> field_map, std::vector<std::map<std::string, std::string>>& map_data)
+bool MongoDBManager::SelectNoticeColl(const char* dbname, const char* collname, const std::map<std::string, std::string> id_map, const std::vector< std::string> field_map, std::vector<std::map<std::string, std::string>>& map_data)
 {
 	MongoDBConnectionPool* dbapi = static_cast<MongoDBConnectionPool*>(m_mongodb_ptr);
 	if (dbapi == nullptr) { return false; }

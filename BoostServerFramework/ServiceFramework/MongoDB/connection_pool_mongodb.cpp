@@ -1,9 +1,4 @@
-﻿/*
- * dbio_mysql.cpp
- *
- *  Created on: Aug 20, 2015
- *      Author: root
- */
+﻿
 #include "connection_pool_mongodb.hpp"
 #include <numeric>
 MongoDBConnectionPool::MongoDBConnectionPool()

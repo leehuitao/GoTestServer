@@ -1,465 +1,219 @@
 ﻿#include "redis_manager.h"
 #include <numeric>
-RedisConn::RedisConn() :ctx_(nullptr)
+#include <boost/lexical_cast.hpp>
+
+RedisManager& RedisManager::instance()
 {
-	redis_ip_ = "127.0.0.1";
-	redis_port_ = 6379;
-	redis_pwd_ = "";
-	time_out_ = 2000;
-	status_ = false;
+	static RedisManager s_instance;
+	return s_instance;
 }
 
-RedisConn::~RedisConn()
-{
-	Release();
-}
-
-bool RedisConn::Init(const std::string& redis_addr, const std::size_t& port, const std::string& pwd,
-	int conn_timeout)
-{
-	redis_ip_ = redis_addr;
-	redis_port_ = port;
-	redis_pwd_ = pwd;
-	time_out_ = conn_timeout;
-	return true;
-}
-
-bool RedisConn::RedisConnect()
-{
-	bool bRet = false;
-	if (NULL != ctx_) {
-		redisFree(ctx_);
-		ctx_ = NULL;
-	}
-
-	ctx_ = ConnectWithTimeout();
-	if (NULL == ctx_) {
-		bRet = false;
-	}
-	else {
-		bRet = auth();
-		status_ = bRet;
-	}
-
-	return bRet;
-}
-
-
-bool RedisConn::RedisReConnect()
-{
-	if (NULL == ctx_) {
-		return false;
-	}
-
-	bool bRet = false;
-	redisContext* tmp_ctx = ConnectWithTimeout();
-	if (NULL == tmp_ctx) {
-		bRet = false;
-	}
-	else {
-		redisFree(ctx_);
-		ctx_ = tmp_ctx;
-		bRet = auth();
-	}
-
-	status_ = bRet;
-	return bRet;
-}
-
-bool RedisConn::auth()
-{
-	bool bRet = false;
-	if (0 == redis_pwd_.length()) {
-		bRet = true;
-	}
-	else {
-		redisReply* reply = static_cast<redisReply*>(redisCommand(ctx_, "AUTH %s", redis_pwd_.c_str()));
-		if ((NULL == reply) || (strcasecmp(reply->str, "OK") != 0)) {
-			bRet = false;
-		}
-		else {
-			bRet = true;
-		}
-		freeReplyObject(reply);
-	}
-	status_ = bRet;
-	return bRet;
-}
-
-
-redisContext* RedisConn::ConnectWithTimeout()
-{
-	struct timeval timeoutVal;
-	timeoutVal.tv_sec = time_out_;
-	timeoutVal.tv_usec = 0;
-	redisContext* ctx = NULL;
-	ctx = redisConnectWithTimeout(redis_ip_.c_str(), redis_port_, timeoutVal);
-	if (NULL == ctx || ctx->err) {
-		if (NULL != ctx) {
-			redisFree(ctx);
-			ctx = NULL;
-		}
-	}
-
-	return ctx;
-}
-
-void RedisConn::Release()
-{
-	if (ctx_ != NULL)
-		redisFree(ctx_);
-
-	ctx_ = NULL;
-	status_ = false;
-}
-
-bool RedisConn::Ping()
-{
-	if (ctx_ == NULL) return false;
-
-	redisReply* reply = static_cast<redisReply*>(redisCommand(ctx_, "PING"));
-	bool bRet = (NULL != reply) && (reply->str) && (strcasecmp(reply->str, "PONG") == 0);
-
-	if (bRet) freeReplyObject(reply);
-
-	status_ = bRet;
-	return bRet;
-}
-
-bool RedisConn::ExecuteResonse(std::string& response, const char* format, ...)
-{
-	if (ctx_ == NULL)
-	{
-		status_ = false;
-		return status_;
-	}
-	if (!status_)
-	{
-		if (!RedisReConnect())
-			return false;
-	}
-	status_ = true;
-
-	/*std::vector<char> buf;
-	buf.resize(10000);
-	va_list st;
-	va_start(st, format);
-	vsprintf(&buf[0], format, st);
-	va_end(st);
-	std::string buf_str(&buf[0]);*/
-
-	va_list args;
-	va_start(args, format);
-	redisReply* reply = static_cast<redisReply*>(redisCommand(ctx_, format, args));
-	va_end(args);
-
-	if (reply == NULL)
-	{
-
-		status_ = false;
-		return status_;
-	}
-	std::shared_ptr<redisReply> autoFree(reply, freeReplyObject);
-	if (reply->type == REDIS_REPLY_INTEGER)
-	{
-		response = std::to_string(reply->integer);
-		return true;
-	}
-	else if (reply->type == REDIS_REPLY_STRING)
-	{
-		response.assign(reply->str, reply->len);
-		return true;
-	}
-	else if (reply->type == REDIS_REPLY_STATUS)
-	{
-		response.assign(reply->str, reply->len);
-		return true;
-	}
-	else if (reply->type == REDIS_REPLY_NIL)
-	{
-		response = "";
-		return true;
-	}
-	else if (reply->type == REDIS_REPLY_ERROR)
-	{
-		response.assign(reply->str, reply->len);
-		return false;
-	}
-	else if (reply->type == REDIS_REPLY_ARRAY)
-	{
-		redisReply* rly0 = NULL;
-		std::vector<std::string > params;
-		ParamRly(reply, params);
-		return false;
-	}
-	else
-	{
-		response = "Undefine Reply Type";
-		status_ = false;
-		return false;
-	}
-}
-
-redisReply* RedisConn::ExecuteCmd(const char* format, ...)
-{
-	if (ctx_ == NULL) return NULL;
-
-	va_list args;
-	va_start(args, format);
-	redisReply* reply = static_cast<redisReply*>(redisCommand(ctx_, format, args));
-	va_end(args);
-
-	return reply;
-}
-
-bool RedisConn::ExecuteMap(std::map<std::string, std::string>& response, const char* format, ...)
-{
-	if (ctx_ == NULL)
-	{
-		status_ = false;
-		return status_;
-	}
-	if (!status_)
-	{
-		if (!RedisReConnect())
-			return false;
-	}
-	status_ = true;
-
-	va_list args;
-	va_start(args, format);
-	redisReply* reply = static_cast<redisReply*>(redisCommand(ctx_, format, args));
-	va_end(args);
-
-	if (reply == NULL)
-	{
-		status_ = false;
-		return status_;
-	}
-
-	if (reply->type == REDIS_REPLY_ARRAY)
-	{
-		ParamRlyHash(reply, response);
-		freeReplyObject(reply);
-		return true;
-	}
-	freeReplyObject(reply);
-	return true;
-}
-
-bool RedisConn::ExecuteVec(std::vector<std::string>& response, const char* format, ...)
-{
-	if (ctx_ == NULL)
-	{
-		status_ = false;
-		return status_;
-	}
-	if (!status_)
-	{
-		if (!RedisReConnect())
-			return false;
-	}
-	status_ = true;
-
-	va_list args;
-	va_start(args, format);
-	redisReply* reply = static_cast<redisReply*>(redisCommand(ctx_, format, args));
-	va_end(args);
-
-	if (reply == NULL)
-	{
-		status_ = false;
-		return status_;
-	}
-
-	if (reply->type == REDIS_REPLY_ARRAY)
-	{
-		ParamRly(reply, response);
-		freeReplyObject(reply);
-		return true;
-	}
-	freeReplyObject(reply);
-	return true;
-}
-
-void RedisConn::ParamRly(redisReply* rly, std::vector<std::string>& params)
-{
-	redisReply* rly0 = NULL;
-	if (rly->type == REDIS_REPLY_ARRAY)
-	{
-		for (int i = 0; i < (int)rly->elements; i++) {
-			rly0 = rly->element[i];
-			if (rly0 == NULL) continue;
-
-			if (rly0->type == REDIS_REPLY_ARRAY) {
-				ParamRly(rly0, params);
-			}
-			else
-			{
-				params.push_back(rly0->str);
-			}
-
-		}
-	}
-	else
-	{
-		params.push_back(rly->str);
-	}
-}
-
-void RedisConn::ParamRlyHash(redisReply* rly, std::map<std::string, std::string>& params)
-{
-	redisReply* rly0 = NULL;
-	int m = 0;
-	std::string key, value;
-	if (rly->type == REDIS_REPLY_ARRAY)
-	{
-		for (int i = 0; i < (int)rly->elements; i++) {
-			rly0 = rly->element[i];
-			if (rly0->type == REDIS_REPLY_ARRAY) {
-				ParamRlyHash(rly0, params);
-			}
-			else
-			{
-				if (m == 0)
-				{
-					key = rly0->str;
-					m = 1;
-				}
-				else
-				{
-					params[key] = rly0->str;
-					m = 0;
-				}
-
-			}
-
-		}
-	}
-	else
-	{
-		if (m == 0)
-		{
-			key = rly0->str;
-			m = 1;
-		}
-		else
-		{
-			params[key] = rly0->str;
-			m = 0;
-		}
-	}
-}
-
-
-
-// ���ӳ�
-RedisPool::RedisPool()
+RedisManager::RedisManager() :pool_(new RedisPool())
 {
 	redis_ip_ = "127.0.0.1";
 	redis_port_ = 6379;
 	time_out_ = 1;
-	redis_pwd_ = "";
-	conn_status_ = false;
-	pool_size_ = 50;
-	pool_max_size_ = 150;
+}
+RedisManager::~RedisManager()
+{
 }
 
-RedisPool::~RedisPool()
+
+bool RedisManager::InitPool(const std::string& redis_addr, const std::size_t& port, const std::string& pwd, int conn_timeout, std::size_t pool_size, std::size_t pool_max_size)
 {
-	ReleaseRedisConn();
+	bool ret = pool_->InitPool(redis_addr, port, pwd, conn_timeout, pool_size, pool_max_size);
+
+	return ret;
 }
 
-bool RedisPool::InitPool(const std::string& redis_addr, const std::size_t& port, const std::string& pwd, int conn_timeout, std::size_t pool_size, std::size_t pool_max_size)
+bool RedisManager::flushal()
 {
-	redis_ip_ = redis_addr;
-	redis_port_ = port;
-	redis_pwd_ = pwd;
-	time_out_ = conn_timeout;
-	pool_size_ = pool_size;
-	pool_max_size_ = pool_max_size_;
+	std::string reponse;
+	RedisConnPrt conn = pool_->GetRedisConn();
+	if (!conn.get()) return false;
 
-	for (int i = 0; i < pool_size; i++) {
-		if (!this->CreateConnection()) return false;
+	std::string commond = "flushall";
+	bool ret = conn->ExecuteResonse(reponse, commond.c_str());
+	pool_->FreeRedisConn(conn);
+	return ret;
+}
+
+bool RedisManager::getAllKeys(const std::string& key, std::vector<std::string>& response)
+{
+	RedisConnPrt conn = pool_->GetRedisConn();
+	if (!conn.get()) return false;
+
+	std::string commond = "keys " + key + '\0';
+	bool ret = conn->ExecuteVec(response, commond.c_str());
+	pool_->FreeRedisConn(conn);
+	return ret;
+}
+
+void RedisManager::ReleasePool()
+{
+	pool_->ReleaseRedisConn();
+}
+
+void RedisManager::CheckStatus()
+{
+	pool_->CheckStatus();
+}
+
+bool RedisManager::SetKeyExpire(std::string& key, int time) {
+	std::string reponse;
+	RedisConnPrt conn = pool_->GetRedisConn();
+	if (!conn.get()) return false;
+
+	std::string commond = "EXPIRE " + key + " " + boost::lexical_cast<std::string>(time);
+	bool ret = conn->ExecuteResonse(reponse, commond.c_str());
+	pool_->FreeRedisConn(conn);
+	return ret;
+}
+
+bool RedisManager::DelKey(const std::string& key) {
+	std::string reponse;
+	RedisConnPrt conn = pool_->GetRedisConn();
+	if (!conn.get()) return false;
+
+	std::string commond = "DEL " + key + "\0";
+	bool ret = conn->ExecuteResonse(reponse, commond.c_str());
+	pool_->FreeRedisConn(conn);
+	return ret;
+}
+
+bool RedisManager::KeyExists(const std::string& key) {
+	std::string reponse;
+	RedisConnPrt conn = pool_->GetRedisConn();
+	if (!conn.get()) return false;
+
+	std::string commond = "EXISTS " + key + "\0";
+	bool ret = conn->ExecuteResonse(reponse, commond.c_str());
+	pool_->FreeRedisConn(conn);
+	if (reponse == "1") {
+		return true;
 	}
-	if (conn_pool_.empty())
+	else {
 		return false;
-
-	return true;
-}
-
-RedisConnPrt RedisPool::GetRedisConn()
-{
-	RedisConnPrt connPtr(new RedisConn);
-	while (1)
-	{
-		boost::mutex::scoped_lock lock(mutex_);
-		if (conn_pool_.empty()) {
-			if (pool_size_ <= pool_max_size_)
-			{
-				this->CreateConnection();
-				if (conn_pool_.size() == 0)
-				{
-					return RedisConnPrt();
-				}
-			}
-			continue;
-		}
-
-		connPtr = conn_pool_.front();
-		conn_pool_.pop();
-		if (connPtr.get()) {
-			break;
-		}
-		else {
-			this->CreateConnection();
-			continue;;
-		}
-	}
-	return connPtr;
-}
-
-bool RedisPool::CreateConnection()
-{
-	RedisConnPrt connPtr(new RedisConn);
-	connPtr->Init(redis_ip_, redis_port_, redis_pwd_, time_out_);
-	if (connPtr->RedisConnect())
-	{
-		if (connPtr.get())
-		{
-			conn_pool_.push(connPtr);
-			pool_size_++;
-			return true;
-		}
-	}
-	return false;
-}
-
-void RedisPool::FreeRedisConn(RedisConnPrt redis_conn)
-{
-	if (NULL != redis_conn) {
-		boost::mutex::scoped_lock lock(mutex_);
-		conn_pool_.push(redis_conn);
 	}
 }
 
-void RedisPool::ReleaseRedisConn()
-{
-	boost::mutex::scoped_lock lock(mutex_);
-	for (int i = 0; i < conn_pool_.size(); i++)
-	{
-		conn_pool_.pop();
-	}
+bool RedisManager::SetString(const std::string& key, const std::string& value) {
+	std::string reponse;
+	RedisConnPrt conn = pool_->GetRedisConn();
+	if (!conn.get()) return false;
+
+	std::string commond = "set " + key + " " + value;
+	bool ret = conn->ExecuteResonse(reponse, commond.c_str());
+	pool_->FreeRedisConn(conn);
+	return ret;
 }
 
-void RedisPool::CheckStatus()
-{
-	boost::mutex::scoped_lock lock(mutex_);
-	for (int i = 0; i < conn_pool_.size(); i++)
-	{
-		RedisConnPrt connPtr = conn_pool_.front();
-		if (!connPtr->Ping())
-			connPtr->RedisReConnect();
-	}
+std::string RedisManager::GetString(const std::string& key) {
+	std::string reponse;
+	RedisConnPrt conn = pool_->GetRedisConn();
+	if (!conn.get()) return "";
+
+	std::string commond = "get " + key;
+	bool ret = conn->ExecuteResonse(reponse, commond.c_str());
+	//bool ret = conn->ExecuteResonse(reponse, "get %s", key.c_str());
+	pool_->FreeRedisConn(conn);
+	return reponse;
 }
 
+
+bool RedisManager::Set(const std::string& key, const std::string& field, const std::string& value)
+{
+	std::string reponse;
+	RedisConnPrt conn = pool_->GetRedisConn();
+	if (!conn.get()) return false;
+
+	std::string commond = "set " + key + " " + field + " " + value;
+	bool ret = conn->ExecuteResonse(reponse, commond.c_str());
+	//bool ret = conn->ExecuteResonse(reponse, "set %s %s %s", key.c_str(), field.c_str(), value.c_str());
+	pool_->FreeRedisConn(conn);
+	return ret;
+}
+
+
+
+bool RedisManager::Get(const std::string& key, const std::string& field, std::string& reponse)
+{
+	//std::string reponse;
+	RedisConnPrt conn = pool_->GetRedisConn();
+	if (!conn.get()) return false;
+
+	std::string commond = "get " + key;
+	bool ret = conn->ExecuteResonse(reponse, commond.c_str());
+	//bool ret = conn->ExecuteResonse(reponse, "get %s", key.c_str());
+	pool_->FreeRedisConn(conn);
+	return ret;
+
+}
+bool RedisManager::HSet(const std::string& key, const std::string& commond)
+{
+	std::string reponse;
+	RedisConnPrt conn = pool_->GetRedisConn();
+	if (!conn.get()) return false;
+
+	std::string commond_ = "hmset " + key + " " + commond;
+	bool ret = conn->ExecuteResonse(reponse, commond_.c_str());
+	//bool ret = conn->ExecuteResonse(reponse, "hset %s %s %s", key.c_str(), field.c_str(), value.c_str());
+	pool_->FreeRedisConn(conn);
+	return ret;
+}
+bool RedisManager::HSet(const std::string& key, const std::string& field, const std::string& value)
+{
+	std::string reponse;
+	RedisConnPrt conn = pool_->GetRedisConn();
+	if (!conn.get()) return false;
+
+	std::string commond = "hset " + key + " " + field + " " + value;
+	bool ret = conn->ExecuteResonse(reponse, commond.c_str());
+	//bool ret = conn->ExecuteResonse(reponse, "hset %s %s %s", key.c_str(), field.c_str(), value.c_str());
+	pool_->FreeRedisConn(conn);
+	return ret;
+}
+
+bool RedisManager::HGet(const std::string& key, const std::string& field, std::string& response)
+{
+	RedisConnPrt conn = pool_->GetRedisConn();
+	if (!conn.get()) return false;
+
+	std::string commond = "hget " + key + " " + field;
+	bool ret = conn->ExecuteResonse(response, commond.c_str());
+	/*bool ret = conn->ExecuteResonse(reponse, "hget %s %s", key.c_str(), field.c_str());*/
+	pool_->FreeRedisConn(conn);
+	return ret;
+}
+
+bool RedisManager::HGetAll(const std::string& key, std::map<std::string, std::string>& response)
+{
+	RedisConnPrt conn = pool_->GetRedisConn();
+	if (!conn.get()) return false;
+
+	std::string commond = "hgetall " + key + '\0';
+	bool ret = conn->ExecuteMap(response, commond.c_str());
+	pool_->FreeRedisConn(conn);
+	return ret;
+}
+
+bool RedisManager::HDelField(const std::string& key, const std::string& field) {
+	std::string reponse;
+	RedisConnPrt conn = pool_->GetRedisConn();
+	if (!conn.get()) return false;
+
+	std::string commond = "HDEL  " + key + " " + field + "\0";
+	bool ret = conn->ExecuteResonse(reponse, commond.c_str());
+	pool_->FreeRedisConn(conn);
+	return ret;
+}
+
+bool RedisManager::HFieldCount(const std::string& key, std::string& count) {
+	RedisConnPrt conn = pool_->GetRedisConn();
+	if (!conn.get()) return false;
+
+	std::string commond = "HLEN " + key + " \0";
+	bool ret = conn->ExecuteResonse(count, commond.c_str());
+	pool_->FreeRedisConn(conn);
+	return ret;
+}

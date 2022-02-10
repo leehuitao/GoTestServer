@@ -8,7 +8,7 @@
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
 #include "MysqlManager/dbio_mysql.hpp"
-#include "Hiredis/dbio_redis.h"
+#include "Hiredis/redis_manager.h"
 #include "MongoDB/mongodb_manager.h"
 class HandlerManager : private boost::noncopyable
 {
@@ -102,8 +102,7 @@ int main()
 
 	bool ret = pDBIO->initConnectionPool("dbserver", "dbuser", "dbpassword", "strDBName", 20/*pool size*/, 7777/*port*/);
 	//------------------------redis初始化------------------------------------------
-	DBIORedis redis;
-	auto status = redis.InitPool("127.0.0.1",6379,"",60,20,100);
+	RedisManager::instance().InitPool("127.0.0.1", 6379, "", 60, 20, 100);
 	//------------------------mongodb初始化------------------------------------------
 	MongoDBManager::instance().mongodb_init("mongodb://localhost");
 	//------------------------方法注册------------------------------------------

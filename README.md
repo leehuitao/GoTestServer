@@ -32,7 +32,7 @@ golang测试并发服务器
 19. 2022.1.30  增加boost C++ mysql连接池的使用，mysql版本为8.0.27可自行下载动态库，windows下需要两个预定义 _WIN32_WINNT=0x0601   WIN32_LEAN_AND_MEAN
 20. 2022.2.1   增加redis库
 21. 2022.2.9   完善windows redis连接池，增加测试代码，支持跨平台，后面做MongoDB连接池，增加了目前使用到的各种动态库（redis，mysql。。。。）
-22. 2022.2.10  增加mongodb库和头文件，增加部分实现
+22. 2022.2.10  增加mongodb库和头文件，增加部分实现，修改一下redis的类名和文件名统一使用单例
 ![输入图片说明](image/boost_main.png)
 ![输入图片说明](image/org.png)
 ![输入图片说明](image/server_show.png)

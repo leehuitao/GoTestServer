@@ -33,6 +33,32 @@ golang测试并发服务器
 20. 2022.2.1   增加redis库
 21. 2022.2.9   完善windows redis连接池，增加测试代码，支持跨平台，后面做MongoDB连接池，增加了目前使用到的各种动态库（redis，mysql。。。。）
 22. 2022.2.10  增加mongodb库和头文件，增加部分实现，修改一下redis的类名和文件名统一使用单例
+23. 2022.2.11  预处理项目（WIN32
+_DEBUG
+_CONSOLE
+_LIB
+%(PreprocessorDefinitions)
+USE_DL_PREFIX
+LACKS_STDLIB_H
+NO_QFORKIMPL
+WIN32_IOCP
+_CRT_SECURE_NO_WARNINGS
+BOOST_BIND_GLOBAL_PLACEHOLDERS
+USE_STATIC
+PSAPI_VERSION=1
+WIN32_LEAN_AND_MEAN
+BSON_OS=2）
+链接库（libboost_date_time-vc142-mt-gd-x64-1_78.lib
+libboost_locale-vc142-mt-gd-x64-1_78.lib
+libboost_regex-vc142-mt-gd-x64-1_78.lib
+libboost_system-vc142-mt-gd-x64-1_78.lib
+libboost_thread-vc142-mt-gd-x64-1_78.lib
+libboost_chrono-vc142-mt-gd-x64-1_78.lib
+libmysql.lib
+hiredis.lib
+bson-1.0.lib
+mongoc-1.0.lib）
+指定忽略库（libcmt.lib;MSVCRT）
 ![输入图片说明](image/boost_main.png)
 ![输入图片说明](image/org.png)
 ![输入图片说明](image/server_show.png)

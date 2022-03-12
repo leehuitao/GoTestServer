@@ -59,6 +59,9 @@ hiredis.lib
 bson-1.0.lib
 mongoc-1.0.lib）
 指定忽略库（libcmt.lib;MSVCRT）
+
+
+24. 2022.3.12  增加go websocketserver框架
 ![输入图片说明](image/boost_main.png)
 ![输入图片说明](image/org.png)
 ![输入图片说明](image/server_show.png)
